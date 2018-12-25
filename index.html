@@ -12201,7 +12201,7 @@ var author$project$Polemos$Combat$rangedScore = F2(
 					case 'HorseDutch':
 						return 0;
 					default:
-						return 3;
+						return 4;
 				}
 			} else {
 				var _n2 = ranged.defensive;
@@ -12231,7 +12231,7 @@ var author$project$Polemos$Combat$rangedScore = F2(
 				}
 			}
 		}();
-		return (modifiers.uphill ? 1 : 0) + ((modifiers.officerAttached ? 1 : 0) + ((modifiers.elite ? 1 : 0) + ((_Utils_eq(modifiers.quality, author$project$Polemos$Combat$Veteran) ? 1 : 0) + ((_Utils_eq(modifiers.quality, author$project$Polemos$Combat$Raw) ? (-1) : 0) + ((modifiers.shaken * (-1)) + ((modifiers.artilleryDistance * (-1)) + ((modifiers.longRange ? (-4) : 0) + (baseScore + rollScore))))))));
+		return (modifiers.uphill ? 1 : 0) + ((modifiers.officerAttached ? 1 : 0) + ((modifiers.elite ? 1 : 0) + ((_Utils_eq(modifiers.quality, author$project$Polemos$Combat$Veteran) ? 1 : 0) + ((_Utils_eq(modifiers.quality, author$project$Polemos$Combat$Raw) ? (-1) : 0) + ((modifiers.shaken * (-1)) + (((modifiers.artilleryDistance > 1) ? (modifiers.artilleryDistance * (-1)) : 0) + ((modifiers.longRange ? (-4) : 0) + (baseScore + rollScore))))))));
 	});
 var author$project$Polemos$Combat$viewRangedDefensiveRoll = function (ranged) {
 	return A2(

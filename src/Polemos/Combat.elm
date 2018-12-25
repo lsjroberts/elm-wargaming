@@ -269,7 +269,7 @@ rangedScore ranged position =
                             0
 
                         Artillery ->
-                            3
+                            4
 
                 Defensive ->
                     case ranged.defensive of
@@ -315,7 +315,13 @@ rangedScore ranged position =
              else
                 0
             )
-        |> (+) (modifiers.artilleryDistance * -1)
+        |> (+)
+            (if modifiers.artilleryDistance > 1 then
+                modifiers.artilleryDistance * -1
+
+             else
+                0
+            )
         |> (+) (modifiers.shaken * -1)
         |> (+)
             (if modifiers.quality == Raw then
