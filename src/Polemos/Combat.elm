@@ -638,7 +638,7 @@ rollD6 =
 
 
 view model =
-    Element.layout [ padding 40, height fill ] <|
+    Element.layout [ height fill ] <|
         case model of
             New ->
                 viewNew
@@ -656,44 +656,36 @@ view model =
 
 
 viewNew =
-    column [ centerX, spacing 20 ]
-        [ title "Combat"
-        , button { onPress = Just StartRanged, label = text "Ranged Combat" }
-        , button { onPress = Just StartClose, label = text "Close Combat" }
+    column [ width fill, height fill ]
+        [ fillButton [] { onPress = Just StartRanged, label = text "Ranged Combat" }
+        , fillButton [ Background.color (rgb 0.7 0.3 0.3) ]
+            { onPress = Just StartClose, label = text "Close Combat" }
 
         -- , button { onPress = Just StartCharging, label = text "Charging" }
         ]
 
 
 viewRanged ranged =
-    let
-        calculator =
-            if ranged.offensive == Unknown then
-                viewBaseButtons ranged SetRangedOffensive "Offensive Base" "Combat = Ranged"
+    if ranged.offensive == Unknown then
+        viewBaseButtons ranged SetRangedOffensive "Offensive Base" "Combat = Ranged"
 
-            else if ranged.defensive == Unknown then
-                viewBaseButtons ranged SetRangedDefensive "Defensive Base" "Combat = Ranged"
+    else if ranged.defensive == Unknown then
+        viewBaseButtons ranged SetRangedDefensive "Defensive Base" "Combat = Ranged"
 
-            else if not ranged.offensiveModifiers.saved then
-                viewRangedOffensiveModifiers ranged
+    else if not ranged.offensiveModifiers.saved then
+        viewRangedOffensiveModifiers ranged
 
-            else if not ranged.defensiveModifiers.saved then
-                viewRangedDefensiveModifiers ranged
+    else if not ranged.defensiveModifiers.saved then
+        viewRangedDefensiveModifiers ranged
 
-            else if ranged.offensiveRoll == Nothing then
-                viewRangedOffensiveRoll ranged
+    else if ranged.offensiveRoll == Nothing then
+        viewRangedOffensiveRoll ranged
 
-            else if ranged.defensiveRoll == Nothing then
-                viewRangedDefensiveRoll ranged
+    else if ranged.defensiveRoll == Nothing then
+        viewRangedDefensiveRoll ranged
 
-            else
-                viewRangedScores ranged
-    in
-    row [ spacing 20, width fill ]
-        [ el [ width (fillPortion 1) ] <| el [ centerX ] <| calculator
-
-        -- , el [ width (fillPortion 1), centerY ] <| el [ centerX ] <| viewRangedBattle ranged
-        ]
+    else
+        viewRangedScores ranged
 
 
 
@@ -719,118 +711,27 @@ viewRanged ranged =
 --         ]
 
 
-viewRangedBattle ranged =
-    let
-        viewIcon color label =
-            el
-                [ width (px 28)
-                , height (px 28)
-                , Background.color color
-                , Border.rounded 14
-                , Font.color (rgb 1 1 1)
-                , Font.center
-                , padding 4
-                ]
-                (text label)
-
-        viewBase base modifiers score color =
-            column [ spacing 5 ]
-                [ row [ width fill, spaceEvenly ]
-                    [ if modifiers.shaken > 0 then
-                        row [ spacing 5 ]
-                            (List.range 1 modifiers.shaken
-                                |> List.map (\_ -> viewIcon (rgb 0.4 0 0) "S")
-                            )
-
-                      else
-                        none
-                    , if modifiers.elite then
-                        viewIcon (rgb 0 0 0.4) "E"
-
-                      else
-                        none
-                    , if modifiers.officerAttached then
-                        viewIcon (rgb 0 0 0) "O"
-
-                      else
-                        none
-                    , viewIcon
-                        (case modifiers.quality of
-                            Raw ->
-                                rgb 0.4 0 0
-
-                            Trained ->
-                                rgb 0.4 0.4 0.4
-
-                            Veteran ->
-                                rgb 0 0.4 0
-                        )
-                        (case modifiers.quality of
-                            Raw ->
-                                "R"
-
-                            Trained ->
-                                "T"
-
-                            Veteran ->
-                                "V"
-                        )
-                    ]
-                , el [ width (px 240), height (px 120), Background.color color ] <|
-                    column [ centerX, centerY, spacing 10, Font.color (rgb 1 1 1) ] <|
-                        [ text (baseToString base)
-                        , el [ centerX ] <| text (String.fromInt score)
-                        ]
-                ]
-    in
-    column
-        [ spacing
-            (if ranged.offensiveModifiers.longRange then
-                240
-
-             else
-                120
-            )
-        ]
-        [ viewBase ranged.offensive ranged.offensiveModifiers (rangedScore ranged Offensive) (rgb 0.5 0.8 0.5)
-        , viewBase ranged.defensive ranged.defensiveModifiers (rangedScore ranged Defensive) (rgb 0.8 0.5 0.5)
-        ]
-
-
 viewClose close =
-    let
-        calculator =
-            -- if close.counts.saved == False then
-            --     viewCloseCounts close
-            -- else
-            if close.offensive == Unknown then
-                viewBaseButtons close SetCloseOffensive "Offensive Base" "Combat = Close"
+    if close.offensive == Unknown then
+        viewBaseButtons close SetCloseOffensive "Offensive Base" "Combat = Close"
 
-            else if close.defensive == Unknown then
-                viewBaseButtons close SetCloseDefensive "Defensive Base" "Combat = Close"
+    else if close.defensive == Unknown then
+        viewBaseButtons close SetCloseDefensive "Defensive Base" "Combat = Close"
 
-            else if not close.offensiveModifiers.saved then
-                viewCloseOffensiveModifiers close
+    else if not close.offensiveModifiers.saved then
+        viewCloseOffensiveModifiers close
 
-            else if not close.defensiveModifiers.saved then
-                viewCloseDefensiveModifiers close
+    else if not close.defensiveModifiers.saved then
+        viewCloseDefensiveModifiers close
 
-            else if close.offensiveRoll == Nothing then
-                viewCloseOffensiveRoll close
+    else if close.offensiveRoll == Nothing then
+        viewCloseOffensiveRoll close
 
-            else if close.defensiveRoll == Nothing then
-                viewCloseDefensiveRoll close
+    else if close.defensiveRoll == Nothing then
+        viewCloseDefensiveRoll close
 
-            else
-                viewCloseScores close
-
-        -- text "no"
-    in
-    row [ spacing 20, width fill ]
-        [ el [ width (fillPortion 1) ] <| el [ centerX ] <| calculator
-
-        -- , el [ width (fillPortion 1), centerY ] <| el [ centerX ] <| viewCloseBattle close
-        ]
+    else
+        viewCloseScores close
 
 
 viewCloseBattle close =
@@ -847,62 +748,32 @@ viewCloseBattle close =
 viewBaseButtons combat setMsg label subLabel =
     let
         baseButton base =
-            button
+            fillButton []
                 { onPress = Just (setMsg combat base)
                 , label = text (baseToString base)
                 }
     in
-    column [ spacing 20 ]
+    --title label
+    -- , option subLabel
+    -- , if combat.offensive == Unknown then
+    --     none
+    --   else
+    --     option ("Offensive = " ++ baseToString combat.offensive)
+    -- , separator
+    column [ width fill, height fill ]
         [ title label
-
-        -- , option subLabel
-        -- , if combat.offensive == Unknown then
-        --     none
-        --   else
-        --     option ("Offensive = " ++ baseToString combat.offensive)
-        -- , separator
-        , row [ spacing 20 ]
-            [ column [ spacing 20 ]
-                [ baseButton Shot
-                , baseButton ShotHeavy
-                , baseButton Mixed
-                , baseButton PikeHeavy
-                , baseButton Pike
-                ]
-            , column [ spacing 20 ]
-                [ baseButton DismountedDragoons
-                , baseButton MountedDragoons
-                , baseButton HorseSwedish
-                , baseButton HorseDutch
-                , baseButton Artillery
-                ]
-            ]
-        , separator
-        , inactiveButton { onPress = Just Reset, label = text "New" }
+        , baseButton Shot
+        , baseButton ShotHeavy
+        , baseButton Mixed
+        , baseButton PikeHeavy
+        , baseButton Pike
+        , baseButton DismountedDragoons
+        , baseButton MountedDragoons
+        , baseButton HorseSwedish
+        , baseButton HorseDutch
+        , baseButton Artillery
+        , resetButton
         ]
-
-
-
--- viewCloseCounts close =
---     let
---         numberedButton_ label numbers get action =
---             numberedButton label numbers (get close) (\i -> SetCloseCounts close (action close.counts i))
---     in
---     column [ spacing 20 ]
---         [ title "Number of Bases"
---         , option "Combat = Close"
---         , separator
---         , numberedButton_ "Offensive" [ 0, 1, 2, 3, 4, 5, 6 ] (.counts >> .offensive) (\c i -> { c | offensive = i })
---         , numberedButton_ "Defensive" [ 0, 1, 2, 3, 4, 5, 6 ] (.counts >> .defensive) (\c i -> { c | defensive = i })
---         , row [ spacing 10, width fill ]
---             [ text "Overlap"
---             , row [ spacing 10, alignRight ]
---                 [ button { onPress = Just (SetCloseCounts close ((\counts -> { counts | overlap = counts.overlap - 1 }) close.counts)), label = text "←" }
---                 , button { onPress = Just (SetCloseCounts close ((\counts -> { counts | overlap = counts.overlap + 1 }) close.counts)), label = text "→" }
---                 ]
---             ]
---         , button { onPress = Just (SetCloseCounts close ((\counts -> { counts | saved = True }) close.counts)), label = text "Next →" }
---         ]
 
 
 viewRangedOffensiveModifiers ranged =
@@ -916,26 +787,20 @@ viewRangedOffensiveModifiers ranged =
         optionButtons_ label options get action =
             optionButtons label options (get ranged.offensiveModifiers) (\v -> SetRangedOffensiveModifiers ranged (action ranged.offensiveModifiers v))
     in
-    column [ spacing 20 ]
+    column [ width fill, height fill ]
         [ title "Offensive Modifiers"
-
-        -- , option "Combat = Ranged"
-        -- , option ("Offensive = " ++ baseToString ranged.offensive)
-        -- , option ("Defensive = " ++ baseToString ranged.defensive)
-        -- , separator
         , if ranged.offensive == Artillery then
             numberedButton_ "Artillery Distance" [ 0, 1, 2, 3, 4 ] .artilleryDistance (\m i -> { m | artilleryDistance = i })
 
           else
             modifierButton_ "Long Range" .longRange (\m -> { m | longRange = not m.longRange })
         , numberedButton_ "Shaken" [ 0, 1, 2 ] .shaken (\m i -> { m | shaken = i })
-        , optionButtons_ "Quality" [ ( Raw, "Raw" ), ( Trained, "Trained" ), ( Veteran, "Veteran" ) ] .quality (\m v -> { m | quality = v })
+        , optionButtons_ "Level" [ ( Raw, "Raw" ), ( Trained, "Exp" ), ( Veteran, "Vet" ) ] .quality (\m v -> { m | quality = v })
         , modifierButton_ "Elite" .elite (\m -> { m | elite = not m.elite })
         , modifierButton_ "Officer Attached" .officerAttached (\m -> { m | officerAttached = not m.officerAttached })
         , modifierButton_ "Uphill of target" .uphill (\m -> { m | uphill = not m.uphill })
-        , button { onPress = Just (SetRangedOffensiveModifiers ranged (ranged.offensiveModifiers |> (\m -> { m | saved = True }))), label = text "Next →" }
-        , separator
-        , inactiveButton { onPress = Just Reset, label = text "New" }
+        , nextButton { onPress = Just (SetRangedOffensiveModifiers ranged (ranged.offensiveModifiers |> (\m -> { m | saved = True }))), label = text "Next →" }
+        , resetButton
         ]
 
 
@@ -950,14 +815,13 @@ viewRangedDefensiveModifiers ranged =
         optionButtons_ label options get action =
             optionButtons label options (get ranged.defensiveModifiers) (\v -> SetRangedDefensiveModifiers ranged (action ranged.defensiveModifiers v))
     in
-    column [ spacing 20 ]
+    column [ width fill, height fill ]
         [ title "Defensive Modifiers"
         , numberedButton_ "Shaken" [ 0, 1, 2 ] .shaken (\m i -> { m | shaken = i })
-        , optionButtons_ "Quality" [ ( Raw, "Raw" ), ( Trained, "Trained" ), ( Veteran, "Veteran" ) ] .quality (\m v -> { m | quality = v })
+        , optionButtons_ "Level" [ ( Raw, "Raw" ), ( Trained, "Exp" ), ( Veteran, "Vet" ) ] .quality (\m v -> { m | quality = v })
         , modifierButton_ "Elite" .elite (\m -> { m | elite = not m.elite })
-        , button { onPress = Just (SetRangedDefensiveModifiers ranged (ranged.defensiveModifiers |> (\m -> { m | saved = True }))), label = text "Next →" }
-        , separator
-        , inactiveButton { onPress = Just Reset, label = text "New" }
+        , nextButton { onPress = Just (SetRangedDefensiveModifiers ranged (ranged.defensiveModifiers |> (\m -> { m | saved = True }))), label = text "Next →" }
+        , resetButton
         ]
 
 
@@ -972,20 +836,43 @@ viewCloseOffensiveModifiers close =
         optionButtons_ label options get action =
             optionButtons label options (get close.offensiveModifiers) (\v -> SetCloseOffensiveModifiers close (action close.offensiveModifiers v))
     in
-    column [ centerX, spacing 20 ]
+    column [ width fill, height fill ]
         [ title "Offensive Modifiers"
-        , modifierButton_ "First Phase" .firstPhase (\m -> { m | firstPhase = not m.firstPhase })
-        , optionButtons_ "Contacting" [ ( ContactingFront, "Front" ), ( ContactingFlankOrRear, "Flank / Rear" ), ( Static, "None" ) ] .contacting (\m v -> { m | contacting = v })
-        , optionButtons_ "Charging" [ ( ChargingFront, "Front" ), ( ChargingFlankOrRear, "Flank / Rear" ), ( Static, "None" ) ] .contacting (\m v -> { m | contacting = v })
-        , numberedButton_ "Flanks Overlapped" [ 0, 1, 2 ] .flanksOverlapped (\m i -> { m | flanksOverlapped = i })
+        , modifierButton_ "First Phase"
+            .firstPhase
+            (\m ->
+                { m
+                    | firstPhase = not m.firstPhase
+                    , recoiled =
+                        if not m.firstPhase then
+                            False
+
+                        else
+                            m.recoiled
+                }
+            )
+        , optionButtons_ "Contact" [ ( Static, "No" ), ( ContactingFront, "Ft" ), ( ContactingFlankOrRear, "Fk / R" ) ] .contacting (\m v -> { m | contacting = v })
+        , optionButtons_ "Charge" [ ( Static, "No" ), ( ChargingFront, "Ft" ), ( ChargingFlankOrRear, "Fk / R" ) ] .contacting (\m v -> { m | contacting = v })
+        , numberedButton_ "Flanks" [ 0, 1, 2 ] .flanksOverlapped (\m i -> { m | flanksOverlapped = i })
         , numberedButton_ "Shaken" [ 0, 1, 2 ] .shaken (\m i -> { m | shaken = i })
-        , modifierButton_ "Recoiled" .recoiled (\m -> { m | recoiled = not m.recoiled })
-        , optionButtons_ "Quality" [ ( Raw, "Raw" ), ( Trained, "Trained" ), ( Veteran, "Veteran" ) ] .quality (\m v -> { m | quality = v })
+        , modifierButton_ "Recoiled"
+            .recoiled
+            (\m ->
+                { m
+                    | recoiled = not m.recoiled
+                    , firstPhase =
+                        if not m.recoiled then
+                            False
+
+                        else
+                            m.firstPhase
+                }
+            )
+        , optionButtons_ "Level" [ ( Raw, "Raw" ), ( Trained, "Exp" ), ( Veteran, "Vet" ) ] .quality (\m v -> { m | quality = v })
         , modifierButton_ "Elite" .elite (\m -> { m | elite = not m.elite })
-        , optionButtons_ "Officer" [ ( Nothing, "None" ), ( Just Good, "Good" ), ( Just Average, "Average" ), ( Just Bad, "Bad" ) ] .officerAttached (\m v -> { m | officerAttached = v })
-        , button { onPress = Just (SetCloseOffensiveModifiers close (close.offensiveModifiers |> (\m -> { m | saved = True }))), label = text "Next →" }
-        , separator
-        , inactiveButton { onPress = Just Reset, label = text "New" }
+        , optionButtons_ "Officer" [ ( Nothing, "No" ), ( Just Bad, "7" ), ( Just Average, "8" ), ( Just Good, "9" ) ] .officerAttached (\m v -> { m | officerAttached = v })
+        , fillButton [] { onPress = Just (SetCloseOffensiveModifiers close (close.offensiveModifiers |> (\m -> { m | saved = True }))), label = text "Next →" }
+        , resetButton
         ]
 
 
@@ -1000,18 +887,17 @@ viewCloseDefensiveModifiers close =
         optionButtons_ label options get action =
             optionButtons label options (get close.defensiveModifiers) (\v -> SetCloseDefensiveModifiers close (action close.defensiveModifiers v))
     in
-    column [ centerX, spacing 20 ]
+    column [ width fill, height fill ]
         [ title "Defensive Modifiers"
-        , numberedButton_ "Flanks Overlapped" [ 0, 1, 2 ] .flanksOverlapped (\m i -> { m | flanksOverlapped = i })
+        , numberedButton_ "Flanks" [ 0, 1, 2 ] .flanksOverlapped (\m i -> { m | flanksOverlapped = i })
         , numberedButton_ "Shaken" [ 0, 1, 2 ] .shaken (\m i -> { m | shaken = i })
         , modifierButton_ "Recoiled" .recoiled (\m -> { m | recoiled = not m.recoiled })
-        , optionButtons_ "Quality" [ ( Raw, "Raw" ), ( Trained, "Trained" ), ( Veteran, "Veteran" ) ] .quality (\m v -> { m | quality = v })
+        , optionButtons_ "Level" [ ( Raw, "Raw" ), ( Trained, "Exp" ), ( Veteran, "Vet" ) ] .quality (\m v -> { m | quality = v })
         , modifierButton_ "Elite" .elite (\m -> { m | elite = not m.elite })
-        , optionButtons_ "Officer" [ ( Nothing, "None" ), ( Just Good, "Good" ), ( Just Average, "Average" ), ( Just Bad, "Bad" ) ] .officerAttached (\m v -> { m | officerAttached = v })
+        , optionButtons_ "Officer" [ ( Nothing, "No" ), ( Just Bad, "7" ), ( Just Average, "8" ), ( Just Good, "9" ) ] .officerAttached (\m v -> { m | officerAttached = v })
         , numberedButton_ "Terrain" [ 0, 1, 2 ] .terrainDefence (\m i -> { m | terrainDefence = i })
-        , button { onPress = Just (SetCloseDefensiveModifiers close (close.defensiveModifiers |> (\m -> { m | saved = True }))), label = text "Next →" }
-        , separator
-        , inactiveButton { onPress = Just Reset, label = text "New" }
+        , fillButton [] { onPress = Just (SetCloseDefensiveModifiers close (close.defensiveModifiers |> (\m -> { m | saved = True }))), label = text "Next →" }
+        , resetButton
         ]
 
 
@@ -1028,7 +914,7 @@ viewCloseDefensiveModifiers close =
 --     column [ spacing 20 ]
 --         [ title "Offensive Modifiers"
 --         , numberedButton_ "Shaken" [ 0, 1, 2 ] .shaken (\m i -> { m | shaken = i })
---         , optionButtons_ "Quality" [ ( Raw, "Raw" ), ( Trained, "Trained" ), ( Veteran, "Veteran" ) ] .quality (\m v -> { m | quality = v })
+--         , optionButtons_ "Level" [ ( Raw, "Raw" ), ( Trained, "Trained" ), ( Veteran, "Veteran" ) ] .quality (\m v -> { m | quality = v })
 --         , modifierButton_ "Elite" .elite (\m -> { m | elite = not m.elite })
 --         , button { onPress = Just (SetChargingOffensiveModifiers charging (charging.offensiveModifiers |> (\m -> { m | saved = True }))), label = text "Next →" }
 --         , separator
@@ -1046,7 +932,7 @@ viewCloseDefensiveModifiers close =
 --     column [ spacing 20 ]
 --         [ title "Offensive Modifiers"
 --         , numberedButton_ "Shaken" [ 0, 1, 2 ] .shaken (\m i -> { m | shaken = i })
---         , optionButtons_ "Quality" [ ( Raw, "Raw" ), ( Trained, "Trained" ), ( Veteran, "Veteran" ) ] .quality (\m v -> { m | quality = v })
+--         , optionButtons_ "Level" [ ( Raw, "Raw" ), ( Trained, "Trained" ), ( Veteran, "Veteran" ) ] .quality (\m v -> { m | quality = v })
 --         , modifierButton_ "Elite" .elite (\m -> { m | elite = not m.elite })
 --         , button { onPress = Just (SetChargingDefensiveModifiers charging (charging.defensiveModifiers |> (\m -> { m | saved = True }))), label = text "Next →" }
 --         , separator
@@ -1055,152 +941,19 @@ viewCloseDefensiveModifiers close =
 
 
 viewRangedOffensiveRoll ranged =
-    column [ spacing 20 ] <|
-        [ title "Offensive Roll"
-        , button
-            { onPress = Just (RandomRangedOffensiveRoll ranged)
-            , label = text "Roll"
-            }
-        , separator
-        , row [ spacing 10, width fill ] <|
-            List.map
-                (\i ->
-                    button
-                        { onPress = Just (SetRangedOffensiveRoll ranged i)
-                        , label = text (String.fromInt i)
-                        }
-                )
-                [ 1, 2, 3 ]
-        , row [ spacing 10, width fill ] <|
-            List.map
-                (\i ->
-                    button
-                        { onPress = Just (SetRangedOffensiveRoll ranged i)
-                        , label = text (String.fromInt i)
-                        }
-                )
-                [ 4, 5, 6 ]
-        , separator
-        , inactiveButton { onPress = Just Reset, label = text "New" }
-        , separator
-        , option "Combat = Ranged"
-        , option ("Offensive = " ++ baseToString ranged.offensive)
-        , option ("Defensive = " ++ baseToString ranged.defensive)
-        , separator
-        , option ("Offensive Plain Score = " ++ (rangedScore ranged Offensive |> String.fromInt))
-        , option ("Defensive Plain Score = " ++ (rangedScore ranged Defensive |> String.fromInt))
-
-        -- , separator
-        -- , option ("Best Result = " ++ rangedScoreEffect ranged (rangedScore ranged Offensive - rangedScore ranged Defensive + 5))
-        ]
+    viewRoll "Offensive Roll" ranged SetRangedOffensiveRoll rangedScore
 
 
 viewRangedDefensiveRoll ranged =
-    column [ spacing 20 ] <|
-        [ title "Defensive Roll"
-        , button
-            { onPress = Just (RandomRangedDefensiveRoll ranged)
-            , label = text "Roll"
-            }
-        , separator
-        , row [ spacing 10, width fill ] <|
-            List.map
-                (\i ->
-                    button
-                        { onPress = Just (SetRangedDefensiveRoll ranged i)
-                        , label = text (String.fromInt i)
-                        }
-                )
-                [ 1, 2, 3 ]
-        , row [ spacing 10, width fill ] <|
-            List.map
-                (\i ->
-                    button
-                        { onPress = Just (SetRangedDefensiveRoll ranged i)
-                        , label = text (String.fromInt i)
-                        }
-                )
-                [ 4, 5, 6 ]
-        , separator
-        , inactiveButton { onPress = Just Reset, label = text "New" }
-        , separator
-        , option "Combat = Ranged"
-        , option ("Offensive = " ++ baseToString ranged.offensive)
-        , option ("Defensive = " ++ baseToString ranged.defensive)
-        , separator
-        , option ("Offensive Plain Score = " ++ (rangedScore ranged Offensive |> String.fromInt))
-        , option ("Defensive Plain Score = " ++ (rangedScore ranged Defensive |> String.fromInt))
-        , separator
-        , option ("Offensive Roll = " ++ (ranged.offensiveRoll |> Maybe.withDefault 0 |> String.fromInt))
-        ]
+    viewRoll "Defensive Roll" ranged SetRangedDefensiveRoll rangedScore
 
 
 viewCloseOffensiveRoll close =
-    column [ spacing 20 ] <|
-        [ title "Offensive Roll"
-        , row [ spacing 10, width fill ] <|
-            List.map
-                (\i ->
-                    button
-                        { onPress = Just (SetCloseOffensiveRoll close i)
-                        , label = text (String.fromInt i)
-                        }
-                )
-                [ 1, 2, 3 ]
-        , row [ spacing 10, width fill ] <|
-            List.map
-                (\i ->
-                    button
-                        { onPress = Just (SetCloseOffensiveRoll close i)
-                        , label = text (String.fromInt i)
-                        }
-                )
-                [ 4, 5, 6 ]
-        , separator
-        , inactiveButton { onPress = Just Reset, label = text "New" }
-        , separator
-        , option "Combat = Ranged"
-        , option ("Offensive = " ++ baseToString close.offensive)
-        , option ("Defensive = " ++ baseToString close.defensive)
-        , separator
-        , option ("Offensive Plain Score = " ++ (closeScore close Offensive |> String.fromInt))
-        , option ("Defensive Plain Score = " ++ (closeScore close Defensive |> String.fromInt))
-        ]
+    viewRoll "Offensive Roll" close SetCloseOffensiveRoll closeScore
 
 
 viewCloseDefensiveRoll close =
-    column [ spacing 20 ] <|
-        [ title "Defensive Roll"
-        , row [ spacing 10, width fill ] <|
-            List.map
-                (\i ->
-                    button
-                        { onPress = Just (SetCloseDefensiveRoll close i)
-                        , label = text (String.fromInt i)
-                        }
-                )
-                [ 1, 2, 3 ]
-        , row [ spacing 10, width fill ] <|
-            List.map
-                (\i ->
-                    button
-                        { onPress = Just (SetCloseDefensiveRoll close i)
-                        , label = text (String.fromInt i)
-                        }
-                )
-                [ 4, 5, 6 ]
-        , separator
-        , inactiveButton { onPress = Just Reset, label = text "New" }
-        , separator
-        , option "Combat = Ranged"
-        , option ("Offensive = " ++ baseToString close.offensive)
-        , option ("Defensive = " ++ baseToString close.defensive)
-        , separator
-        , option ("Offensive Plain Score = " ++ (closeScore close Offensive |> String.fromInt))
-        , option ("Defensive Plain Score = " ++ (closeScore close Defensive |> String.fromInt))
-        , separator
-        , option ("Offensive Roll = " ++ (close.offensiveRoll |> Maybe.withDefault 0 |> String.fromInt))
-        ]
+    viewRoll "Defensive Roll" close SetCloseDefensiveRoll closeScore
 
 
 viewChargingOffensiveRoll ranged =
@@ -1234,6 +987,39 @@ viewChargingOffensiveRoll ranged =
         ]
 
 
+viewRoll label model setRollMsg scorer =
+    column [ width fill, height fill ] <|
+        [ title label
+        , titleWith
+            (column [ width fill, spacing 20 ]
+                [ el [ centerX ] <|
+                    text <|
+                        baseToString model.offensive
+                            ++ " ("
+                            ++ (scorer model Offensive |> String.fromInt)
+                            ++ ")"
+                , el [ centerX ] <| text <| "vs."
+                , el [ centerX ] <|
+                    text <|
+                        baseToString model.defensive
+                            ++ " ("
+                            ++ (scorer model Defensive |> String.fromInt)
+                            ++ ")"
+                ]
+            )
+        , column [ width fill, height fill ] <|
+            List.map
+                (\i ->
+                    fillButton []
+                        { onPress = Just (setRollMsg model i)
+                        , label = text (String.fromInt i)
+                        }
+                )
+                [ 1, 2, 3, 4, 5, 6 ]
+        , resetButton
+        ]
+
+
 viewRangedScores ranged =
     let
         offensiveScore =
@@ -1251,7 +1037,7 @@ viewRangedScores ranged =
         score =
             offensiveScore - defensiveScore
     in
-    column [ spacing 20 ]
+    column [ width fill, height fill ]
         [ if offensiveScore > defensiveScore then
             title "Offensive Wins"
 
@@ -1260,31 +1046,43 @@ viewRangedScores ranged =
 
           else
             title "Draw"
-        , el
-            [ Background.color (rgb 0.3 0.6 0.3)
-            , Font.center
-            , Font.color (rgb 1 1 1)
-            , Font.size 24
-            , padding 20
-            , width fill
-            ]
-            (text (rangedScoreEffect ranged score))
-        , separator
-        , button { onPress = Just (ResetRangedRolls ranged), label = text "Re-roll" }
-        , button { onPress = Just Reset, label = text "New" }
-        , separator
-        , option "Combat = Ranged"
-        , option ("Offensive = " ++ baseToString ranged.offensive)
-        , option ("Defensive = " ++ baseToString ranged.defensive)
-        , separator
-        , option ("Offensive Plain Score = " ++ (offensiveScoreWithoutRoll |> String.fromInt))
-        , option ("Defensive Plain Score = " ++ (defensiveScoreWithoutRoll |> String.fromInt))
-        , separator
-        , option ("Offensive Roll = " ++ (ranged.offensiveRoll |> Maybe.withDefault 0 |> String.fromInt))
-        , option ("Defensive Roll = " ++ (ranged.defensiveRoll |> Maybe.withDefault 0 |> String.fromInt))
-        , separator
-        , option ("Offensive Score = " ++ (offensiveScore |> String.fromInt))
-        , option ("Defensive Score = " ++ (defensiveScore |> String.fromInt))
+        , fillWith
+            [ Background.color (rgb 0.3 0.6 0.3), Font.color (rgb 1 1 1) ]
+            (el [ centerX, centerY ] <| text (rangedScoreEffect ranged score))
+        , titleWith
+            (column [ width fill, spacing 20 ]
+                [ el [ centerX ] <|
+                    text <|
+                        baseToString ranged.offensive
+                            ++ " ("
+                            ++ (offensiveScore |> String.fromInt)
+                            ++ ")"
+                , el [ centerX ] <| text <| "vs."
+                , el [ centerX ] <|
+                    text <|
+                        baseToString ranged.defensive
+                            ++ " ("
+                            ++ (defensiveScore |> String.fromInt)
+                            ++ ")"
+                ]
+            )
+        , fillButton []
+            { onPress = Just (ResetRangedRolls ranged), label = text "Re-roll" }
+        , resetButton
+
+        -- , separator
+        -- , option "Combat = Ranged"
+        -- , option ("Offensive = " ++ baseToString ranged.offensive)
+        -- , option ("Defensive = " ++ baseToString ranged.defensive)
+        -- , separator
+        -- , option ("Offensive Plain Score = " ++ (offensiveScoreWithoutRoll |> String.fromInt))
+        -- , option ("Defensive Plain Score = " ++ (defensiveScoreWithoutRoll |> String.fromInt))
+        -- , separator
+        -- , option ("Offensive Roll = " ++ (ranged.offensiveRoll |> Maybe.withDefault 0 |> String.fromInt))
+        -- , option ("Defensive Roll = " ++ (ranged.defensiveRoll |> Maybe.withDefault 0 |> String.fromInt))
+        -- , separator
+        -- , option ("Offensive Score = " ++ (offensiveScore |> String.fromInt))
+        -- , option ("Defensive Score = " ++ (defensiveScore |> String.fromInt))
         ]
 
 
@@ -1305,7 +1103,7 @@ viewCloseScores close =
         score =
             offensiveScore - defensiveScore
     in
-    column [ spacing 20 ]
+    column [ width fill, height fill ]
         [ if offensiveScore > defensiveScore then
             title "Offensive Wins"
 
@@ -1314,31 +1112,43 @@ viewCloseScores close =
 
           else
             title "Draw"
-        , el
-            [ Background.color (rgb 0.3 0.6 0.3)
-            , Font.center
-            , Font.color (rgb 1 1 1)
-            , Font.size 24
-            , padding 20
-            , width fill
-            ]
-            (text (closeScoreEffect close score))
-        , separator
-        , button { onPress = Just (ResetCloseRolls close), label = text "Re-roll" }
-        , button { onPress = Just Reset, label = text "New" }
-        , separator
-        , option "Combat = Close"
-        , option ("Offensive = " ++ baseToString close.offensive)
-        , option ("Defensive = " ++ baseToString close.defensive)
-        , separator
-        , option ("Offensive Plain Score = " ++ (offensiveScoreWithoutRoll |> String.fromInt))
-        , option ("Defensive Plain Score = " ++ (defensiveScoreWithoutRoll |> String.fromInt))
-        , separator
-        , option ("Offensive Roll = " ++ (close.offensiveRoll |> Maybe.withDefault 0 |> String.fromInt))
-        , option ("Defensive Roll = " ++ (close.defensiveRoll |> Maybe.withDefault 0 |> String.fromInt))
-        , separator
-        , option ("Offensive Score = " ++ (offensiveScore |> String.fromInt))
-        , option ("Defensive Score = " ++ (defensiveScore |> String.fromInt))
+        , fillWith
+            [ Background.color (rgb 0.3 0.6 0.3), Font.color (rgb 1 1 1) ]
+            (el [ centerX, centerY ] <| text (closeScoreEffect close score))
+        , titleWith
+            (column [ width fill, spacing 20 ]
+                [ el [ centerX ] <|
+                    text <|
+                        baseToString close.offensive
+                            ++ " ("
+                            ++ (offensiveScore |> String.fromInt)
+                            ++ ")"
+                , el [ centerX ] <| text <| "vs."
+                , el [ centerX ] <|
+                    text <|
+                        baseToString close.defensive
+                            ++ " ("
+                            ++ (defensiveScore |> String.fromInt)
+                            ++ ")"
+                ]
+            )
+        , fillButton []
+            { onPress = Just (ResetCloseRolls close), label = text "Re-roll" }
+        , resetButton
+
+        -- , separator
+        -- , option "Combat = Close"
+        -- , option ("Offensive = " ++ baseToString close.offensive)
+        -- , option ("Defensive = " ++ baseToString close.defensive)
+        -- , separator
+        -- , option ("Offensive Plain Score = " ++ (offensiveScoreWithoutRoll |> String.fromInt))
+        -- , option ("Defensive Plain Score = " ++ (defensiveScoreWithoutRoll |> String.fromInt))
+        -- , separator
+        -- , option ("Offensive Roll = " ++ (close.offensiveRoll |> Maybe.withDefault 0 |> String.fromInt))
+        -- , option ("Defensive Roll = " ++ (close.defensiveRoll |> Maybe.withDefault 0 |> String.fromInt))
+        -- , separator
+        -- , option ("Offensive Score = " ++ (offensiveScore |> String.fromInt))
+        -- , option ("Defensive Score = " ++ (defensiveScore |> String.fromInt))
         ]
 
 
@@ -1346,8 +1156,24 @@ viewCloseScores close =
 --
 
 
+titleWith e =
+    el
+        [ Background.color (rgb 0.7 0.3 0.7)
+        , Border.widthEach { top = 0, right = 0, bottom = 20, left = 0 }
+        , Border.color (rgb 1 1 1)
+        , Font.color (rgb 1 1 1)
+        , Font.bold
+        , Font.size 60
+        , Font.center
+        , padding 30
+        , width fill
+        ]
+        e
+
+
 title t =
-    el [ Font.bold, Font.size 32, centerX, paddingEach { top = 0, right = 0, bottom = 30, left = 0 } ] (text t)
+    titleWith
+        (text t)
 
 
 option t =
@@ -1364,9 +1190,57 @@ button =
         , Border.rounded 4
         , Font.center
         , Font.color (rgb 1 1 1)
-        , padding 10
+        , padding 20
         , width fill
         ]
+
+
+fillWith styles e =
+    el
+        ([ Font.center
+         , Font.size 60
+         , paddingXY 60 10
+         , width fill
+         , height fill
+         ]
+            ++ styles
+        )
+        e
+
+
+fillButton styles =
+    Input.button
+        ([ Background.color (rgb 0.3 0.3 0.7)
+         , Font.center
+         , Font.color (rgb 1 1 1)
+         , Font.size 60
+         , paddingXY 60 10
+         , width fill
+         , height fill
+         ]
+            ++ styles
+        )
+
+
+resetButton =
+    fillButton
+        [ Background.color (rgb 0.7 0.7 0.7)
+        , Border.widthEach { top = 20, right = 0, bottom = 0, left = 0 }
+        , Border.color (rgb 1 1 1)
+        ]
+        { onPress = Just Reset, label = text "New" }
+
+
+nextButton =
+    fillButton
+        [ Background.color (rgb 0.7 0.3 0.7)
+        , Border.widthEach { top = 20, right = 0, bottom = 0, left = 0 }
+        , Border.color (rgb 1 1 1)
+        ]
+
+
+inactiveFillButton =
+    fillButton [ Background.color (rgb 0.7 0.7 0.7) ]
 
 
 inactiveButton =
@@ -1381,53 +1255,76 @@ inactiveButton =
 
 
 modifierButton label isActive msg =
-    row [ spacing 20, width fill ]
-        [ text label
-        , el [ alignRight ] <|
-            (if isActive then
-                button
+    (if isActive then
+        fillButton []
 
-             else
-                inactiveButton
-            )
-                { onPress = Just msg
-                , label = text "✓"
-                }
-        ]
+     else
+        inactiveFillButton
+    )
+        { onPress = Just msg
+        , label =
+            row [ width fill ]
+                [ text label
+                , el [ alignRight ]
+                    (if isActive then
+                        text "✓"
+
+                     else
+                        text "✕"
+                    )
+                ]
+        }
 
 
 numberedButton label numbers value msg =
-    row [ spacing 20, width fill ]
-        [ text label
-        , row [ spacing 2, width fill ] <|
+    row [ width fill, height fill ]
+        [ el
+            [ Background.color (rgb 0.7 0.6 0.7)
+            , Font.center
+            , Font.color (rgb 1 1 1)
+            , Font.size 60
+            , paddingXY 60 10
+            , width fill
+            , height fill
+            ]
+            (el [ centerY ] (text label))
+        , row [ width fill, height fill ] <|
             List.map
                 (\i ->
-                    el [ alignRight ] <|
-                        (if value == i then
-                            button
+                    (if value == i then
+                        fillButton []
 
-                         else
-                            inactiveButton
-                        )
-                            { onPress = Just (msg i)
-                            , label = text (String.fromInt i)
-                            }
+                     else
+                        inactiveFillButton
+                    )
+                        { onPress = Just (msg i)
+                        , label = text (String.fromInt i)
+                        }
                 )
                 numbers
         ]
 
 
 optionButtons label options value msg =
-    row [ spacing 20, width fill ]
-        [ text label
-        , row [ spacing 2, width fill ] <|
+    row [ width fill, height fill ]
+        [ el
+            [ Background.color (rgb 0.7 0.6 0.7)
+            , Font.center
+            , Font.color (rgb 1 1 1)
+            , Font.size 60
+            , paddingXY 60 10
+            , width fill
+            , height fill
+            ]
+            (el [ centerY ] (text label))
+        , row [ width fill, height fill ] <|
             List.map
                 (\( v, t ) ->
                     (if value == v then
-                        button
+                        fillButton []
 
                      else
-                        inactiveButton
+                        inactiveFillButton
                     )
                         { onPress = Just (msg v)
                         , label = text t
