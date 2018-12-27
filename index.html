@@ -4893,8 +4893,8 @@ var author$project$Polemos$Combat$SetRangedOffensiveRoll = F2(
 var author$project$Polemos$Combat$Unknown = {$: 'Unknown'};
 var author$project$Polemos$Combat$Static = {$: 'Static'};
 var author$project$Polemos$Combat$Trained = {$: 'Trained'};
-var author$project$Polemos$Combat$initCloseModifiers = {contacting: author$project$Polemos$Combat$Static, elite: false, firstPhase: true, flanksOverlapped: 0, officerAttached: elm$core$Maybe$Nothing, quality: author$project$Polemos$Combat$Trained, recoiled: false, saved: false, shaken: 0, terrainDefence: 0};
-var author$project$Polemos$Combat$initRangedModifiers = {artilleryDistance: 0, elite: false, longRange: false, officerAttached: false, quality: author$project$Polemos$Combat$Trained, saved: false, shaken: 0, uphill: false};
+var author$project$Polemos$Combat$initCloseModifiers = {contacting: author$project$Polemos$Combat$Static, elite: false, firstPhase: true, flanksOverlapped: 0, officerAttached: elm$core$Maybe$Nothing, quality: author$project$Polemos$Combat$Trained, recoiled: false, saved: false, shaken: 0, terrain: 0};
+var author$project$Polemos$Combat$initRangedModifiers = {artilleryDistance: 0, elite: false, longRange: false, officerAttached: false, quality: author$project$Polemos$Combat$Trained, saved: false, shaken: 0, terrain: 0, uphill: false};
 var elm$core$Basics$identity = function (x) {
 	return x;
 };
@@ -11447,13 +11447,13 @@ var author$project$Polemos$Combat$viewCloseDefensiveModifiers = function (close)
 				_List_fromArray(
 					[0, 1, 2]),
 				function ($) {
-					return $.terrainDefence;
+					return $.terrain;
 				},
 				F2(
 					function (m, i) {
 						return _Utils_update(
 							m,
-							{terrainDefence: i});
+							{terrain: i});
 					})),
 				A2(
 				author$project$Polemos$Combat$fillButton,
@@ -11508,6 +11508,10 @@ var author$project$Polemos$Combat$closeScore = F2(
 					return 1;
 			}
 		}();
+		var cond = F2(
+			function (c, score) {
+				return c ? score : 0;
+			});
 		var baseScore = function () {
 			if (position.$ === 'Offensive') {
 				var _n1 = close.offensive;
@@ -11591,11 +11595,20 @@ var author$project$Polemos$Combat$closeScore = F2(
 				}
 			}
 		}();
-		return (_Utils_eq(modifiers.quality, author$project$Polemos$Combat$Raw) ? (-1) : 0) + (((modifiers.firstPhase && (_Utils_eq(modifiers.quality, author$project$Polemos$Combat$Veteran) || modifiers.elite)) ? 1 : 0) + ((_Utils_eq(
-			modifiers.officerAttached,
-			elm$core$Maybe$Just(author$project$Polemos$Combat$Good)) ? 2 : (_Utils_eq(
-			modifiers.officerAttached,
-			elm$core$Maybe$Just(author$project$Polemos$Combat$Average)) ? 1 : 0)) + ((modifiers.recoiled ? (-2) : 0) + (((((baseScore + rollScore) + contactingScore) - modifiers.flanksOverlapped) - (modifiers.shaken * 2)) + modifiers.terrainDefence))));
+		return ((modifiers.firstPhase && (_Utils_eq(modifiers.quality, author$project$Polemos$Combat$Veteran) || modifiers.elite)) ? 1 : 0) + (((((((((baseScore + rollScore) + contactingScore) - modifiers.flanksOverlapped) - (modifiers.shaken * 2)) + modifiers.terrain) + A2(cond, modifiers.recoiled, -2)) + A2(
+			cond,
+			_Utils_eq(
+				modifiers.officerAttached,
+				elm$core$Maybe$Just(author$project$Polemos$Combat$Good)),
+			2)) + A2(
+			cond,
+			_Utils_eq(
+				modifiers.officerAttached,
+				elm$core$Maybe$Just(author$project$Polemos$Combat$Average)),
+			1)) + A2(
+			cond,
+			_Utils_eq(modifiers.quality, author$project$Polemos$Combat$Raw),
+			-1));
 	});
 var author$project$Polemos$Combat$Defensive = {$: 'Defensive'};
 var author$project$Polemos$Combat$Offensive = {$: 'Offensive'};
@@ -12166,6 +12179,20 @@ var author$project$Polemos$Combat$viewRangedDefensiveModifiers = function (range
 						m,
 						{elite: !m.elite});
 				}),
+				A4(
+				numberedButton_,
+				'Terrain',
+				_List_fromArray(
+					[0, 1, 2]),
+				function ($) {
+					return $.terrain;
+				},
+				F2(
+					function (m, i) {
+						return _Utils_update(
+							m,
+							{terrain: i});
+					})),
 				author$project$Polemos$Combat$nextButton(
 				{
 					label: mdgriffith$elm_ui$Element$text('Next →'),
@@ -12198,6 +12225,10 @@ var author$project$Polemos$Combat$rangedScore = F2(
 				return ranged.defensiveModifiers;
 			}
 		}();
+		var cond = F2(
+			function (c, score) {
+				return c ? score : 0;
+			});
 		var baseScore = function () {
 			if (position.$ === 'Offensive') {
 				var _n1 = ranged.offensive;
@@ -12253,7 +12284,10 @@ var author$project$Polemos$Combat$rangedScore = F2(
 				}
 			}
 		}();
-		return (modifiers.uphill ? 1 : 0) + ((modifiers.officerAttached ? 1 : 0) + ((modifiers.elite ? 1 : 0) + ((_Utils_eq(modifiers.quality, author$project$Polemos$Combat$Veteran) ? 1 : 0) + ((_Utils_eq(modifiers.quality, author$project$Polemos$Combat$Raw) ? (-1) : 0) + ((modifiers.shaken * (-1)) + (((modifiers.artilleryDistance > 1) ? (modifiers.artilleryDistance * (-1)) : 0) + ((modifiers.longRange ? (-4) : 0) + (baseScore + rollScore))))))));
+		return ((_Utils_eq(modifiers.quality, author$project$Polemos$Combat$Raw) && _Utils_eq(position, author$project$Polemos$Combat$Offensive)) ? (-1) : 0) + (((modifiers.artilleryDistance > 1) ? (modifiers.artilleryDistance * (-1)) : 0) + ((((((((baseScore + rollScore) + modifiers.terrain) + (modifiers.shaken * (-1))) + A2(cond, modifiers.longRange, -4)) + A2(
+			cond,
+			_Utils_eq(modifiers.quality, author$project$Polemos$Combat$Veteran),
+			1)) + A2(cond, modifiers.elite, 1)) + A2(cond, modifiers.officerAttached, 1)) + A2(cond, modifiers.uphill, 1)));
 	});
 var author$project$Polemos$Combat$viewRangedDefensiveRoll = function (ranged) {
 	return A4(author$project$Polemos$Combat$viewRoll, 'Defensive Roll', ranged, author$project$Polemos$Combat$SetRangedDefensiveRoll, author$project$Polemos$Combat$rangedScore);

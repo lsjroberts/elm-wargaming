@@ -111,8 +111,7 @@ type alias RangedModifiers =
     , quality : Quality
     , elite : Bool
     , officerAttached : Bool
-
-    -- , terrain : Terrain
+    , terrain : Int
     , uphill : Bool
     , saved : Bool
     }
@@ -127,7 +126,7 @@ type alias CloseModifiers =
     , quality : Quality
     , elite : Bool
     , firstPhase : Bool
-    , terrainDefence : Int
+    , terrain : Int
     , saved : Bool
     }
 
@@ -136,8 +135,7 @@ type alias ChargingModifiers =
     { shaken : Int
     , quality : Quality
     , elite : Bool
-
-    -- , terrain : Terrain
+    , terrain : Int
     , saved : Bool
     }
 
@@ -216,8 +214,7 @@ initRangedModifiers =
     , quality = Trained
     , elite = False
     , officerAttached = False
-
-    -- , terrain : Terrain
+    , terrain = 0
     , uphill = False
     , saved = False
     }
@@ -233,7 +230,7 @@ initCloseModifiers =
     , quality = Trained
     , elite = False
     , firstPhase = True
-    , terrainDefence = 0
+    , terrain = 0
     , saved = False
     }
 
@@ -327,16 +324,23 @@ rangedScore ranged position =
 
                         Artillery ->
                             2
+
+        cond c score =
+            if c then
+                score
+
+            else
+                0
     in
     baseScore
         + rollScore
-        |> (+)
-            (if modifiers.longRange then
-                -4
-
-             else
-                0
-            )
+        + modifiers.terrain
+        + (modifiers.shaken * -1)
+        + cond modifiers.longRange -4
+        + cond (modifiers.quality == Veteran) 1
+        + cond modifiers.elite 1
+        + cond modifiers.officerAttached 1
+        + cond modifiers.uphill 1
         |> (+)
             (if modifiers.artilleryDistance > 1 then
                 modifiers.artilleryDistance * -1
@@ -344,38 +348,9 @@ rangedScore ranged position =
              else
                 0
             )
-        |> (+) (modifiers.shaken * -1)
         |> (+)
-            (if modifiers.quality == Raw then
+            (if modifiers.quality == Raw && position == Offensive then
                 -1
-
-             else
-                0
-            )
-        |> (+)
-            (if modifiers.quality == Veteran then
-                1
-
-             else
-                0
-            )
-        |> (+)
-            (if modifiers.elite then
-                1
-
-             else
-                0
-            )
-        |> (+)
-            (if modifiers.officerAttached then
-                1
-
-             else
-                0
-            )
-        |> (+)
-            (if modifiers.uphill then
-                1
 
              else
                 0
@@ -526,40 +501,27 @@ closeScore close position =
 
                 ContactingFront ->
                     1
+
+        cond c score =
+            if c then
+                score
+
+            else
+                0
     in
     baseScore
         + rollScore
         + contactingScore
         - modifiers.flanksOverlapped
         - (modifiers.shaken * 2)
-        + modifiers.terrainDefence
-        |> (+)
-            (if modifiers.recoiled then
-                -2
-
-             else
-                0
-            )
-        |> (+)
-            (if modifiers.officerAttached == Just Good then
-                2
-
-             else if modifiers.officerAttached == Just Average then
-                1
-
-             else
-                0
-            )
+        + modifiers.terrain
+        + cond modifiers.recoiled -2
+        + cond (modifiers.officerAttached == Just Good) 2
+        + cond (modifiers.officerAttached == Just Average) 1
+        + cond (modifiers.quality == Raw) -1
         |> (+)
             (if modifiers.firstPhase && (modifiers.quality == Veteran || modifiers.elite) then
                 1
-
-             else
-                0
-            )
-        |> (+)
-            (if modifiers.quality == Raw then
-                -1
 
              else
                 0
@@ -861,6 +823,7 @@ viewRangedDefensiveModifiers ranged =
         , numberedButton_ "Shaken" [ 0, 1, 2 ] .shaken (\m i -> { m | shaken = i })
         , optionButtons_ "Level" [ ( Raw, "Raw" ), ( Trained, "Exp" ), ( Veteran, "Vet" ) ] .quality (\m v -> { m | quality = v })
         , modifierButton_ "Elite" .elite (\m -> { m | elite = not m.elite })
+        , numberedButton_ "Terrain" [ 0, 1, 2 ] .terrain (\m i -> { m | terrain = i })
         , nextButton { onPress = Just (SetRangedDefensiveModifiers ranged (ranged.defensiveModifiers |> (\m -> { m | saved = True }))), label = text "Next →" }
         , resetButton
         ]
@@ -936,7 +899,7 @@ viewCloseDefensiveModifiers close =
         , optionButtons_ "Level" [ ( Raw, "Raw" ), ( Trained, "Exp" ), ( Veteran, "Vet" ) ] .quality (\m v -> { m | quality = v })
         , modifierButton_ "Elite" .elite (\m -> { m | elite = not m.elite })
         , optionButtons_ "Officer" [ ( Nothing, "No" ), ( Just Bad, "7" ), ( Just Average, "8" ), ( Just Good, "9" ) ] .officerAttached (\m v -> { m | officerAttached = v })
-        , numberedButton_ "Terrain" [ 0, 1, 2 ] .terrainDefence (\m i -> { m | terrainDefence = i })
+        , numberedButton_ "Terrain" [ 0, 1, 2 ] .terrain (\m i -> { m | terrain = i })
         , fillButton [] { onPress = Just (SetCloseDefensiveModifiers close (close.defensiveModifiers |> (\m -> { m | saved = True }))), label = text "Next →" }
         , resetButton
         ]
