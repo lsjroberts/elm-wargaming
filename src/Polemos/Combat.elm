@@ -924,7 +924,7 @@ viewRangedDefensiveModifiers ranged =
         , numberedButton_ "Shaken" [ 0, 1, 2 ] .shaken (\m i -> { m | shaken = i })
         , optionButtons_ "Level" [ ( Raw, "Raw" ), ( Trained, "Exp" ), ( Veteran, "Vet" ) ] .quality (\m v -> { m | quality = v })
         , modifierButton_ "Elite" .elite (\m -> { m | elite = not m.elite })
-        , numberedButton_ "Terrain" [ 0, 1, 2 ] .terrain (\m i -> { m | terrain = i })
+        , numberedButton_ "Terrain" [ 0, 1, 2, 3, 4 ] .terrain (\m i -> { m | terrain = i })
         , nextButton { onPress = Just (SetRangedDefensiveModifiers ranged (ranged.defensiveModifiers |> (\m -> { m | saved = True }))), label = text "Next →" }
         , resetButton
         ]
@@ -1000,7 +1000,7 @@ viewCloseDefensiveModifiers close =
         , optionButtons_ "Level" [ ( Raw, "Raw" ), ( Trained, "Exp" ), ( Veteran, "Vet" ) ] .quality (\m v -> { m | quality = v })
         , modifierButton_ "Elite" .elite (\m -> { m | elite = not m.elite })
         , optionButtons_ "Officer" [ ( Nothing, "No" ), ( Just Bad, "7" ), ( Just Average, "8" ), ( Just Good, "9" ) ] .officerAttached (\m v -> { m | officerAttached = v })
-        , numberedButton_ "Terrain" [ 0, 1, 2 ] .terrain (\m i -> { m | terrain = i })
+        , numberedButton_ "Terrain" [ 0, 1, 2, 3, 4 ] .terrain (\m i -> { m | terrain = i })
         , fillButton [] { onPress = Just (SetCloseDefensiveModifiers close (close.defensiveModifiers |> (\m -> { m | saved = True }))), label = text "Next →" }
         , resetButton
         ]
@@ -1047,7 +1047,7 @@ viewChargeDefensiveModifiers charge =
         , numberedButton_ "Shaken" [ 0, 1, 2 ] .shaken (\m i -> { m | shaken = i })
         , optionButtons_ "Level" [ ( Raw, "Raw" ), ( Trained, "Exp" ), ( Veteran, "Vet" ) ] .quality (\m v -> { m | quality = v })
         , modifierButton_ "Elite" .elite (\m -> { m | elite = not m.elite })
-        , numberedButton_ "Terrain" [ 0, 1, 2 ] .terrain (\m i -> { m | terrain = i })
+        , numberedButton_ "Terrain" [ 0, 1, 2, 3, 4 ] .terrain (\m i -> { m | terrain = i })
         , nextButton { onPress = Just (SetChargeDefensiveModifiers charge (charge.defensiveModifiers |> (\m -> { m | saved = True }))), label = text "Next →" }
         , resetButton
         ]
@@ -1355,7 +1355,7 @@ fillWith styles e =
     el
         ([ Font.center
          , Font.size 60
-         , paddingXY 60 10
+         , paddingXY 40 5
          , width fill
          , height fill
          ]
@@ -1372,7 +1372,7 @@ fillButton styles =
          , Font.center
          , Font.color (rgb 1 1 1)
          , Font.size 60
-         , paddingXY 60 10
+         , paddingXY 40 5
          , width fill
          , height fill
          ]
@@ -1441,7 +1441,7 @@ numberedButton label numbers value msg =
             , Font.center
             , Font.color (rgb 1 1 1)
             , Font.size 60
-            , paddingXY 60 10
+            , paddingXY 40 5
             , width fill
             , height fill
             ]
@@ -1470,7 +1470,7 @@ optionButtons label options value msg =
             , Font.center
             , Font.color (rgb 1 1 1)
             , Font.size 60
-            , paddingXY 60 10
+            , paddingXY 40 5
             , width fill
             , height fill
             ]
