@@ -26,10 +26,7 @@ type Model
     = New
     | Ranged RangedCombat
     | Close CloseCombat
-
-
-
--- | Charging ChargingCombat
+    | Charge ChargeCombat
 
 
 type alias RangedCombat =
@@ -54,10 +51,11 @@ type alias CloseCombat =
     }
 
 
-type alias ChargingCombat =
-    { defensive : BaseType
-    , offensiveModifiers : ChargingModifiers
-    , defensiveModifiers : ChargingModifiers
+type alias ChargeCombat =
+    { offensive : BaseType
+    , defensive : BaseType
+    , offensiveModifiers : ChargeModifiers
+    , defensiveModifiers : ChargeModifiers
     , offensiveRoll : Maybe Int
     , defensiveRoll : Maybe Int
     }
@@ -131,11 +129,14 @@ type alias CloseModifiers =
     }
 
 
-type alias ChargingModifiers =
-    { shaken : Int
+type alias ChargeModifiers =
+    { bases : Int
+    , shaken : Int
+    , officerAttached : Bool
     , quality : Quality
     , elite : Bool
     , terrain : Int
+    , uphill : Bool
     , saved : Bool
     }
 
@@ -191,14 +192,14 @@ type Msg
     | SetCloseOffensiveRoll CloseCombat Int
     | SetCloseDefensiveRoll CloseCombat Int
     | ResetCloseRolls CloseCombat
-
-
-
--- Charging
--- | StartCharging
--- | SetChargingDefensive ChargingCombat BaseType
--- | SetChargingOffensiveModifiers ChargingCombat ChargingModifiers
--- | SetChargingDefensiveModifiers ChargingCombat ChargingModifiers
+      -- Charge
+    | StartCharge
+    | SetChargeDefensive ChargeCombat BaseType
+    | SetChargeOffensiveModifiers ChargeCombat ChargeModifiers
+    | SetChargeDefensiveModifiers ChargeCombat ChargeModifiers
+    | SetChargeOffensiveRoll ChargeCombat Int
+    | SetChargeDefensiveRoll ChargeCombat Int
+    | ResetChargeRolls ChargeCombat
 
 
 init : () -> ( Model, Cmd Msg )
@@ -528,6 +529,82 @@ closeScore close position =
             )
 
 
+chargeScore : ChargeCombat -> Position -> Int
+chargeScore charge position =
+    let
+        modifiers =
+            case position of
+                Offensive ->
+                    charge.offensiveModifiers
+
+                Defensive ->
+                    charge.defensiveModifiers
+
+        rollScore =
+            case position of
+                Offensive ->
+                    Maybe.withDefault 0 charge.offensiveRoll
+
+                Defensive ->
+                    Maybe.withDefault 0 charge.defensiveRoll
+
+        baseScore =
+            case position of
+                Offensive ->
+                    3
+
+                Defensive ->
+                    case charge.defensive of
+                        Unknown ->
+                            0
+
+                        Shot ->
+                            2
+
+                        ShotHeavy ->
+                            3
+
+                        Mixed ->
+                            4
+
+                        PikeHeavy ->
+                            5
+
+                        Pike ->
+                            6
+
+                        DismountedDragoons ->
+                            1
+
+                        MountedDragoons ->
+                            1
+
+                        HorseSwedish ->
+                            3
+
+                        HorseDutch ->
+                            2
+
+                        Artillery ->
+                            1
+
+        cond c score =
+            if c then
+                score
+
+            else
+                0
+    in
+    baseScore
+        + rollScore
+        + (modifiers.shaken * -1)
+        + cond (modifiers.quality == Veteran) 1
+        + cond modifiers.elite 1
+        + cond (position == Offensive && modifiers.officerAttached) 1
+        + cond (position == Offensive && modifiers.uphill) 1
+        + cond (position == Defensive) modifiers.terrain
+
+
 rangedScoreEffect ranged score =
     if score <= 1 then
         "No effect"
@@ -566,6 +643,23 @@ closeScoreEffect close score =
 
     else
         "Rout"
+
+
+chargeScoreEffect charge score =
+    if score < 0 then
+        "Chargers remain in place, shaken +1"
+
+    else if score <= 1 then
+        "Charge home, shaken +1"
+
+    else if score <= 4 then
+        "Charge home"
+
+    else if score == 5 then
+        "Charge home, target shaken +1"
+
+    else
+        "Charge home, target recoils shaken +1"
 
 
 
@@ -635,17 +729,27 @@ update msg model =
         ResetCloseRolls close ->
             ( Close { close | offensiveRoll = Nothing, defensiveRoll = Nothing }, Cmd.none )
 
+        -- Charging
+        StartCharge ->
+            ( Charge (ChargeCombat HorseSwedish Unknown (ChargeModifiers 0 0 False Trained False 0 False False) (ChargeModifiers 0 0 False Trained False 0 False False) Nothing Nothing), Cmd.none )
 
+        SetChargeDefensive charge base ->
+            ( Charge { charge | defensive = base }, Cmd.none )
 
--- Charging
--- StartCharging ->
---     ( Charging (ChargingCombat Unknown (ChargingModifiers 0 Trained False False) (ChargingModifiers 0 Trained False False) Nothing Nothing), Cmd.none )
--- SetChargingDefensive close base ->
---     ( Charging { close | defensive = base }, Cmd.none )
--- SetChargingOffensiveModifiers charging modifiers ->
---     ( Charging { charging | offensiveModifiers = modifiers }, Cmd.none )
--- SetChargingDefensiveModifiers charging modifiers ->
---     ( Charging { charging | defensiveModifiers = modifiers }, Cmd.none )
+        SetChargeOffensiveModifiers charge modifiers ->
+            ( Charge { charge | offensiveModifiers = modifiers }, Cmd.none )
+
+        SetChargeDefensiveModifiers charge modifiers ->
+            ( Charge { charge | defensiveModifiers = modifiers }, Cmd.none )
+
+        SetChargeOffensiveRoll charge roll ->
+            ( Charge { charge | offensiveRoll = Just roll }, Cmd.none )
+
+        SetChargeDefensiveRoll charge roll ->
+            ( Charge { charge | defensiveRoll = Just roll }, Cmd.none )
+
+        ResetChargeRolls charge ->
+            ( Charge { charge | offensiveRoll = Nothing, defensiveRoll = Nothing }, Cmd.none )
 
 
 rollD6 : Random.Generator Int
@@ -669,17 +773,17 @@ view model =
             Close close ->
                 viewClose close
 
-
-
--- Charging charging ->
---     viewCharging charging
+            Charge charge ->
+                viewCharge charge
 
 
 viewNew =
     column [ width fill, height fill ]
-        [ fillButton [] { onPress = Just StartRanged, label = text "Ranged Combat" }
-        , fillButton [ Background.color (rgb 0.7 0.3 0.3) ]
+        [ fillButton [ Border.widthEach { top = 0, right = 0, bottom = 20, left = 0 } ] { onPress = Just StartRanged, label = text "Ranged Combat" }
+        , fillButton [ Background.color (rgb 0.7 0.3 0.3), Border.widthEach { top = 0, right = 0, bottom = 20, left = 0 } ]
             { onPress = Just StartClose, label = text "Close Combat" }
+        , fillButton [ Background.color (rgb 0.3 0.7 0.3) ]
+            { onPress = Just StartCharge, label = text "Charge" }
 
         -- , button { onPress = Just StartCharging, label = text "Charging" }
         ]
@@ -708,27 +812,24 @@ viewRanged ranged =
         viewRangedScores ranged
 
 
+viewCharge charge =
+    if charge.defensive == Unknown then
+        viewBaseButtons charge SetChargeDefensive "Defensive Base" allBases
 
--- viewCharging charging =
---     let
---         calculator =
---             if charging.defensive == Unknown then
---                 viewBaseButtons charging SetChargingDefensive "Defensive Base" "Combat = Charging"
---             else if not charging.offensiveModifiers.saved then
---                 viewChargingOffensiveModifiers charging
---             else if not charging.defensiveModifiers.saved then
---                 viewChargingDefensiveModifiers charging
---             else if charging.offensiveRoll == Nothing then
---                 viewChargingOffensiveRoll charging
---             else if charging.defensiveRoll == Nothing then
---                 viewChargingDefensiveRoll charging
---             else
---                 viewRangedScores charging
---     in
---     row [ spacing 20, width fill, height fill ]
---         [ el [ width (fillPortion 1) ] <| el [ centerX ] <| calculator
---         -- , el [ width (fillPortion 1), centerY ] <| el [ centerX ] <| viewRangedBattle charging
---         ]
+    else if not charge.offensiveModifiers.saved then
+        viewChargeOffensiveModifiers charge
+
+    else if not charge.defensiveModifiers.saved then
+        viewChargeDefensiveModifiers charge
+
+    else if charge.offensiveRoll == Nothing then
+        viewChargeOffensiveRoll charge
+
+    else if charge.defensiveRoll == Nothing then
+        viewChargeDefensiveRoll charge
+
+    else
+        viewChargeScores charge
 
 
 viewClose close =
@@ -905,43 +1006,51 @@ viewCloseDefensiveModifiers close =
         ]
 
 
+viewChargeOffensiveModifiers charge =
+    let
+        modifierButton_ label isActive action =
+            modifierButton label (isActive charge.offensiveModifiers) (SetChargeOffensiveModifiers charge (action charge.offensiveModifiers))
 
--- viewChargingOffensiveModifiers charging =
---     let
---         modifierButton_ label isActive action =
---             modifierButton label (isActive charging.offensiveModifiers) (SetChargingDefensiveModifiers charging (action charging.offensiveModifiers))
---         numberedButton_ label numbers get action =
---             numberedButton label numbers (get charging.offensiveModifiers) (\i -> SetChargingDefensiveModifiers charging (action charging.offensiveModifiers i))
---         optionButtons_ label options get action =
---             optionButtons label options (get charging.offensiveModifiers) (\v -> SetChargingDefensiveModifiers charging (action charging.offensiveModifiers v))
---     in
---     column [ spacing 20 ]
---         [ title "Offensive Modifiers"
---         , numberedButton_ "Shaken" [ 0, 1, 2 ] .shaken (\m i -> { m | shaken = i })
---         , optionButtons_ "Level" [ ( Raw, "Raw" ), ( Trained, "Trained" ), ( Veteran, "Veteran" ) ] .quality (\m v -> { m | quality = v })
---         , modifierButton_ "Elite" .elite (\m -> { m | elite = not m.elite })
---         , button { onPress = Just (SetChargingOffensiveModifiers charging (charging.offensiveModifiers |> (\m -> { m | saved = True }))), label = text "Next →" }
---         , separator
---         , inactiveButton { onPress = Just Reset, label = text "New" }
---         ]
--- viewChargingDefensiveModifiers charging =
---     let
---         modifierButton_ label isActive action =
---             modifierButton label (isActive charging.defensiveModifiers) (SetChargingDefensiveModifiers charging (action charging.defensiveModifiers))
---         numberedButton_ label numbers get action =
---             numberedButton label numbers (get charging.defensiveModifiers) (\i -> SetChargingDefensiveModifiers charging (action charging.defensiveModifiers i))
---         optionButtons_ label options get action =
---             optionButtons label options (get charging.defensiveModifiers) (\v -> SetChargingDefensiveModifiers charging (action charging.defensiveModifiers v))
---     in
---     column [ spacing 20 ]
---         [ title "Offensive Modifiers"
---         , numberedButton_ "Shaken" [ 0, 1, 2 ] .shaken (\m i -> { m | shaken = i })
---         , optionButtons_ "Level" [ ( Raw, "Raw" ), ( Trained, "Trained" ), ( Veteran, "Veteran" ) ] .quality (\m v -> { m | quality = v })
---         , modifierButton_ "Elite" .elite (\m -> { m | elite = not m.elite })
---         , button { onPress = Just (SetChargingDefensiveModifiers charging (charging.defensiveModifiers |> (\m -> { m | saved = True }))), label = text "Next →" }
---         , separator
---         , inactiveButton { onPress = Just Reset, label = text "New" }
---         ]
+        numberedButton_ label numbers get action =
+            numberedButton label numbers (get charge.offensiveModifiers) (\i -> SetChargeOffensiveModifiers charge (action charge.offensiveModifiers i))
+
+        optionButtons_ label options get action =
+            optionButtons label options (get charge.offensiveModifiers) (\v -> SetChargeOffensiveModifiers charge (action charge.offensiveModifiers v))
+    in
+    column [ width fill, height fill ]
+        [ title "Offensive Modifiers"
+        , numberedButton_ "Extra Bases" [ 0, 1, 2 ] .bases (\m i -> { m | bases = i })
+
+        -- , numberedButton_ "Shaken" [ 0, 1, 2 ] .shaken (\m i -> { m | shaken = i })
+        , optionButtons_ "Level" [ ( Raw, "Raw" ), ( Trained, "Exp" ), ( Veteran, "Vet" ) ] .quality (\m v -> { m | quality = v })
+        , modifierButton_ "Elite" .elite (\m -> { m | elite = not m.elite })
+        , modifierButton_ "Officer Attached" .officerAttached (\m -> { m | officerAttached = not m.officerAttached })
+        , modifierButton_ "Uphill" .uphill (\m -> { m | uphill = not m.uphill })
+        , nextButton { onPress = Just (SetChargeOffensiveModifiers charge (charge.offensiveModifiers |> (\m -> { m | saved = True }))), label = text "Next →" }
+        , resetButton
+        ]
+
+
+viewChargeDefensiveModifiers charge =
+    let
+        modifierButton_ label isActive action =
+            modifierButton label (isActive charge.defensiveModifiers) (SetChargeDefensiveModifiers charge (action charge.defensiveModifiers))
+
+        numberedButton_ label numbers get action =
+            numberedButton label numbers (get charge.defensiveModifiers) (\i -> SetChargeDefensiveModifiers charge (action charge.defensiveModifiers i))
+
+        optionButtons_ label options get action =
+            optionButtons label options (get charge.defensiveModifiers) (\v -> SetChargeDefensiveModifiers charge (action charge.defensiveModifiers v))
+    in
+    column [ width fill, height fill ]
+        [ title "Defensive Modifiers"
+        , numberedButton_ "Shaken" [ 0, 1, 2 ] .shaken (\m i -> { m | shaken = i })
+        , optionButtons_ "Level" [ ( Raw, "Raw" ), ( Trained, "Exp" ), ( Veteran, "Vet" ) ] .quality (\m v -> { m | quality = v })
+        , modifierButton_ "Elite" .elite (\m -> { m | elite = not m.elite })
+        , numberedButton_ "Terrain" [ 0, 1, 2 ] .terrain (\m i -> { m | terrain = i })
+        , nextButton { onPress = Just (SetChargeDefensiveModifiers charge (charge.defensiveModifiers |> (\m -> { m | saved = True }))), label = text "Next →" }
+        , resetButton
+        ]
 
 
 viewRangedOffensiveRoll ranged =
@@ -960,35 +1069,12 @@ viewCloseDefensiveRoll close =
     viewRoll "Defensive Roll" close SetCloseDefensiveRoll closeScore
 
 
-viewChargingOffensiveRoll ranged =
-    column [ spacing 20 ] <|
-        [ title "Offensive Roll"
-        , button
-            { onPress = Just (RandomRangedOffensiveRoll ranged)
-            , label = text "Roll"
-            }
-        , separator
-        , row [ spacing 10, width fill ] <|
-            List.map
-                (\i ->
-                    button
-                        { onPress = Just (SetRangedOffensiveRoll ranged i)
-                        , label = text (String.fromInt i)
-                        }
-                )
-                [ 1, 2, 3 ]
-        , row [ spacing 10, width fill ] <|
-            List.map
-                (\i ->
-                    button
-                        { onPress = Just (SetRangedOffensiveRoll ranged i)
-                        , label = text (String.fromInt i)
-                        }
-                )
-                [ 4, 5, 6 ]
-        , separator
-        , inactiveButton { onPress = Just Reset, label = text "New" }
-        ]
+viewChargeOffensiveRoll charge =
+    viewRoll "Offensive Roll" charge SetChargeOffensiveRoll chargeScore
+
+
+viewChargeDefensiveRoll charge =
+    viewRoll "Defensive Roll" charge SetChargeDefensiveRoll chargeScore
 
 
 viewRoll label model setRollMsg scorer =
@@ -1052,7 +1138,7 @@ viewRangedScores ranged =
             title "Draw"
         , fillWith
             [ Background.color (rgb 0.3 0.6 0.3), Font.color (rgb 1 1 1) ]
-            (el [ centerX, centerY ] <| text (rangedScoreEffect ranged score))
+            (paragraph [ centerX, centerY ] [ text (rangedScoreEffect ranged score) ])
         , titleWith
             (column [ width fill, spacing 20 ]
                 [ el [ centerX ] <|
@@ -1118,7 +1204,7 @@ viewCloseScores close =
             title "Draw"
         , fillWith
             [ Background.color (rgb 0.3 0.6 0.3), Font.color (rgb 1 1 1) ]
-            (el [ centerX, centerY ] <| text (closeScoreEffect close score))
+            (paragraph [ centerX, centerY ] [ text (closeScoreEffect close score) ])
         , titleWith
             (column [ width fill, spacing 20 ]
                 [ el [ centerX ] <|
@@ -1150,6 +1236,72 @@ viewCloseScores close =
         -- , separator
         -- , option ("Offensive Roll = " ++ (close.offensiveRoll |> Maybe.withDefault 0 |> String.fromInt))
         -- , option ("Defensive Roll = " ++ (close.defensiveRoll |> Maybe.withDefault 0 |> String.fromInt))
+        -- , separator
+        -- , option ("Offensive Score = " ++ (offensiveScore |> String.fromInt))
+        -- , option ("Defensive Score = " ++ (defensiveScore |> String.fromInt))
+        ]
+
+
+viewChargeScores charge =
+    let
+        offensiveScore =
+            chargeScore charge Offensive
+
+        defensiveScore =
+            chargeScore charge Defensive
+
+        offensiveScoreWithoutRoll =
+            offensiveScore - Maybe.withDefault 0 charge.offensiveRoll
+
+        defensiveScoreWithoutRoll =
+            defensiveScore - Maybe.withDefault 0 charge.defensiveRoll
+
+        score =
+            offensiveScore - defensiveScore
+    in
+    column [ width fill, height fill ]
+        [ if offensiveScore > defensiveScore then
+            title "Offensive Wins"
+
+          else if offensiveScore < defensiveScore then
+            title "Defensive Wins"
+
+          else
+            title "Draw"
+        , fillWith
+            [ Background.color (rgb 0.3 0.6 0.3), Font.color (rgb 1 1 1) ]
+            (paragraph [ centerX, centerY ] [ text (chargeScoreEffect charge score) ])
+        , titleWith
+            (column [ width fill, spacing 20 ]
+                [ el [ centerX ] <|
+                    text <|
+                        baseToString charge.offensive
+                            ++ " ("
+                            ++ (offensiveScore |> String.fromInt)
+                            ++ ")"
+                , el [ centerX ] <| text <| "vs."
+                , el [ centerX ] <|
+                    text <|
+                        baseToString charge.defensive
+                            ++ " ("
+                            ++ (defensiveScore |> String.fromInt)
+                            ++ ")"
+                ]
+            )
+        , fillButton []
+            { onPress = Just (ResetChargeRolls charge), label = text "Re-roll" }
+        , resetButton
+
+        -- , separator
+        -- , option "Combat = Ranged"
+        -- , option ("Offensive = " ++ baseToString ranged.offensive)
+        -- , option ("Defensive = " ++ baseToString ranged.defensive)
+        -- , separator
+        -- , option ("Offensive Plain Score = " ++ (offensiveScoreWithoutRoll |> String.fromInt))
+        -- , option ("Defensive Plain Score = " ++ (defensiveScoreWithoutRoll |> String.fromInt))
+        -- , separator
+        -- , option ("Offensive Roll = " ++ (ranged.offensiveRoll |> Maybe.withDefault 0 |> String.fromInt))
+        -- , option ("Defensive Roll = " ++ (ranged.defensiveRoll |> Maybe.withDefault 0 |> String.fromInt))
         -- , separator
         -- , option ("Offensive Score = " ++ (offensiveScore |> String.fromInt))
         -- , option ("Defensive Score = " ++ (defensiveScore |> String.fromInt))
@@ -1215,6 +1367,8 @@ fillWith styles e =
 fillButton styles =
     Input.button
         ([ Background.color (rgb 0.3 0.3 0.7)
+         , Border.widthEach { top = 0, right = 0, bottom = 1, left = 0 }
+         , Border.color (rgb 1 1 1)
          , Font.center
          , Font.color (rgb 1 1 1)
          , Font.size 60

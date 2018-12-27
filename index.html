@@ -4868,6 +4868,17 @@ var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Polemos$Combat$init = function (_n0) {
 	return _Utils_Tuple2(author$project$Polemos$Combat$New, elm$core$Platform$Cmd$none);
 };
+var author$project$Polemos$Combat$Charge = function (a) {
+	return {$: 'Charge', a: a};
+};
+var author$project$Polemos$Combat$ChargeCombat = F6(
+	function (offensive, defensive, offensiveModifiers, defensiveModifiers, offensiveRoll, defensiveRoll) {
+		return {defensive: defensive, defensiveModifiers: defensiveModifiers, defensiveRoll: defensiveRoll, offensive: offensive, offensiveModifiers: offensiveModifiers, offensiveRoll: offensiveRoll};
+	});
+var author$project$Polemos$Combat$ChargeModifiers = F8(
+	function (bases, shaken, officerAttached, quality, elite, terrain, uphill, saved) {
+		return {bases: bases, elite: elite, officerAttached: officerAttached, quality: quality, saved: saved, shaken: shaken, terrain: terrain, uphill: uphill};
+	});
 var author$project$Polemos$Combat$Close = function (a) {
 	return {$: 'Close', a: a};
 };
@@ -4875,6 +4886,7 @@ var author$project$Polemos$Combat$CloseCombat = F6(
 	function (offensive, defensive, offensiveModifiers, defensiveModifiers, offensiveRoll, defensiveRoll) {
 		return {defensive: defensive, defensiveModifiers: defensiveModifiers, defensiveRoll: defensiveRoll, offensive: offensive, offensiveModifiers: offensiveModifiers, offensiveRoll: offensiveRoll};
 	});
+var author$project$Polemos$Combat$HorseSwedish = {$: 'HorseSwedish'};
 var author$project$Polemos$Combat$Ranged = function (a) {
 	return {$: 'Ranged', a: a};
 };
@@ -4890,9 +4902,9 @@ var author$project$Polemos$Combat$SetRangedOffensiveRoll = F2(
 	function (a, b) {
 		return {$: 'SetRangedOffensiveRoll', a: a, b: b};
 	});
+var author$project$Polemos$Combat$Trained = {$: 'Trained'};
 var author$project$Polemos$Combat$Unknown = {$: 'Unknown'};
 var author$project$Polemos$Combat$Static = {$: 'Static'};
-var author$project$Polemos$Combat$Trained = {$: 'Trained'};
 var author$project$Polemos$Combat$initCloseModifiers = {contacting: author$project$Polemos$Combat$Static, elite: false, firstPhase: true, flanksOverlapped: 0, officerAttached: elm$core$Maybe$Nothing, quality: author$project$Polemos$Combat$Trained, recoiled: false, saved: false, shaken: 0, terrain: 0};
 var author$project$Polemos$Combat$initRangedModifiers = {artilleryDistance: 0, elite: false, longRange: false, officerAttached: false, quality: author$project$Polemos$Combat$Trained, saved: false, shaken: 0, terrain: 0, uphill: false};
 var elm$core$Basics$identity = function (x) {
@@ -5208,7 +5220,7 @@ var author$project$Polemos$Combat$update = F2(
 								defensiveRoll: elm$core$Maybe$Just(roll)
 							})),
 					elm$core$Platform$Cmd$none);
-			default:
+			case 'ResetCloseRolls':
 				var close = _n0.a;
 				return _Utils_Tuple2(
 					author$project$Polemos$Combat$Close(
@@ -5216,20 +5228,84 @@ var author$project$Polemos$Combat$update = F2(
 							close,
 							{defensiveRoll: elm$core$Maybe$Nothing, offensiveRoll: elm$core$Maybe$Nothing})),
 					elm$core$Platform$Cmd$none);
+			case 'StartCharge':
+				return _Utils_Tuple2(
+					author$project$Polemos$Combat$Charge(
+						A6(
+							author$project$Polemos$Combat$ChargeCombat,
+							author$project$Polemos$Combat$HorseSwedish,
+							author$project$Polemos$Combat$Unknown,
+							A8(author$project$Polemos$Combat$ChargeModifiers, 0, 0, false, author$project$Polemos$Combat$Trained, false, 0, false, false),
+							A8(author$project$Polemos$Combat$ChargeModifiers, 0, 0, false, author$project$Polemos$Combat$Trained, false, 0, false, false),
+							elm$core$Maybe$Nothing,
+							elm$core$Maybe$Nothing)),
+					elm$core$Platform$Cmd$none);
+			case 'SetChargeDefensive':
+				var charge = _n0.a;
+				var base = _n0.b;
+				return _Utils_Tuple2(
+					author$project$Polemos$Combat$Charge(
+						_Utils_update(
+							charge,
+							{defensive: base})),
+					elm$core$Platform$Cmd$none);
+			case 'SetChargeOffensiveModifiers':
+				var charge = _n0.a;
+				var modifiers = _n0.b;
+				return _Utils_Tuple2(
+					author$project$Polemos$Combat$Charge(
+						_Utils_update(
+							charge,
+							{offensiveModifiers: modifiers})),
+					elm$core$Platform$Cmd$none);
+			case 'SetChargeDefensiveModifiers':
+				var charge = _n0.a;
+				var modifiers = _n0.b;
+				return _Utils_Tuple2(
+					author$project$Polemos$Combat$Charge(
+						_Utils_update(
+							charge,
+							{defensiveModifiers: modifiers})),
+					elm$core$Platform$Cmd$none);
+			case 'SetChargeOffensiveRoll':
+				var charge = _n0.a;
+				var roll = _n0.b;
+				return _Utils_Tuple2(
+					author$project$Polemos$Combat$Charge(
+						_Utils_update(
+							charge,
+							{
+								offensiveRoll: elm$core$Maybe$Just(roll)
+							})),
+					elm$core$Platform$Cmd$none);
+			case 'SetChargeDefensiveRoll':
+				var charge = _n0.a;
+				var roll = _n0.b;
+				return _Utils_Tuple2(
+					author$project$Polemos$Combat$Charge(
+						_Utils_update(
+							charge,
+							{
+								defensiveRoll: elm$core$Maybe$Just(roll)
+							})),
+					elm$core$Platform$Cmd$none);
+			default:
+				var charge = _n0.a;
+				return _Utils_Tuple2(
+					author$project$Polemos$Combat$Charge(
+						_Utils_update(
+							charge,
+							{defensiveRoll: elm$core$Maybe$Nothing, offensiveRoll: elm$core$Maybe$Nothing})),
+					elm$core$Platform$Cmd$none);
 		}
 	});
-var author$project$Polemos$Combat$SetCloseDefensive = F2(
+var author$project$Polemos$Combat$SetChargeDefensive = F2(
 	function (a, b) {
-		return {$: 'SetCloseDefensive', a: a, b: b};
-	});
-var author$project$Polemos$Combat$SetCloseOffensive = F2(
-	function (a, b) {
-		return {$: 'SetCloseOffensive', a: a, b: b};
+		return {$: 'SetChargeDefensive', a: a, b: b};
 	});
 var author$project$Polemos$Combat$Artillery = {$: 'Artillery'};
 var author$project$Polemos$Combat$DismountedDragoons = {$: 'DismountedDragoons'};
 var author$project$Polemos$Combat$HorseDutch = {$: 'HorseDutch'};
-var author$project$Polemos$Combat$HorseSwedish = {$: 'HorseSwedish'};
 var author$project$Polemos$Combat$Mixed = {$: 'Mixed'};
 var author$project$Polemos$Combat$MountedDragoons = {$: 'MountedDragoons'};
 var author$project$Polemos$Combat$Pike = {$: 'Pike'};
@@ -5238,79 +5314,6 @@ var author$project$Polemos$Combat$Shot = {$: 'Shot'};
 var author$project$Polemos$Combat$ShotHeavy = {$: 'ShotHeavy'};
 var author$project$Polemos$Combat$allBases = _List_fromArray(
 	[author$project$Polemos$Combat$Shot, author$project$Polemos$Combat$ShotHeavy, author$project$Polemos$Combat$Mixed, author$project$Polemos$Combat$PikeHeavy, author$project$Polemos$Combat$Pike, author$project$Polemos$Combat$DismountedDragoons, author$project$Polemos$Combat$MountedDragoons, author$project$Polemos$Combat$HorseSwedish, author$project$Polemos$Combat$HorseDutch, author$project$Polemos$Combat$Artillery]);
-var elm$core$Basics$neq = _Utils_notEqual;
-var elm$core$List$foldrHelper = F4(
-	function (fn, acc, ctr, ls) {
-		if (!ls.b) {
-			return acc;
-		} else {
-			var a = ls.a;
-			var r1 = ls.b;
-			if (!r1.b) {
-				return A2(fn, a, acc);
-			} else {
-				var b = r1.a;
-				var r2 = r1.b;
-				if (!r2.b) {
-					return A2(
-						fn,
-						a,
-						A2(fn, b, acc));
-				} else {
-					var c = r2.a;
-					var r3 = r2.b;
-					if (!r3.b) {
-						return A2(
-							fn,
-							a,
-							A2(
-								fn,
-								b,
-								A2(fn, c, acc)));
-					} else {
-						var d = r3.a;
-						var r4 = r3.b;
-						var res = (ctr > 500) ? A3(
-							elm$core$List$foldl,
-							fn,
-							acc,
-							elm$core$List$reverse(r4)) : A4(elm$core$List$foldrHelper, fn, acc, ctr + 1, r4);
-						return A2(
-							fn,
-							a,
-							A2(
-								fn,
-								b,
-								A2(
-									fn,
-									c,
-									A2(fn, d, res))));
-					}
-				}
-			}
-		}
-	});
-var elm$core$List$foldr = F3(
-	function (fn, acc, ls) {
-		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
-	});
-var elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
-var author$project$Polemos$Combat$closeBases = A2(
-	elm$core$List$filter,
-	function (t) {
-		return !_Utils_eq(t, author$project$Polemos$Combat$Artillery);
-	},
-	author$project$Polemos$Combat$allBases);
 var author$project$Polemos$Combat$baseToString = function (base) {
 	switch (base.$) {
 		case 'Unknown':
@@ -5424,6 +5427,63 @@ var mdgriffith$elm_ui$Element$Background$color = function (clr) {
 			'bg-' + mdgriffith$elm_ui$Internal$Model$formatColorClass(clr),
 			'background-color',
 			clr));
+};
+var mdgriffith$elm_ui$Internal$Flag$borderColor = mdgriffith$elm_ui$Internal$Flag$flag(28);
+var mdgriffith$elm_ui$Element$Border$color = function (clr) {
+	return A2(
+		mdgriffith$elm_ui$Internal$Model$StyleClass,
+		mdgriffith$elm_ui$Internal$Flag$borderColor,
+		A3(
+			mdgriffith$elm_ui$Internal$Model$Colored,
+			'bc-' + mdgriffith$elm_ui$Internal$Model$formatColorClass(clr),
+			'border-color',
+			clr));
+};
+var mdgriffith$elm_ui$Internal$Flag$borderWidth = mdgriffith$elm_ui$Internal$Flag$flag(27);
+var mdgriffith$elm_ui$Internal$Model$BorderWidth = F5(
+	function (a, b, c, d, e) {
+		return {$: 'BorderWidth', a: a, b: b, c: c, d: d, e: e};
+	});
+var mdgriffith$elm_ui$Element$Border$width = function (v) {
+	return A2(
+		mdgriffith$elm_ui$Internal$Model$StyleClass,
+		mdgriffith$elm_ui$Internal$Flag$borderWidth,
+		A5(
+			mdgriffith$elm_ui$Internal$Model$BorderWidth,
+			'b-' + elm$core$String$fromInt(v),
+			v,
+			v,
+			v,
+			v));
+};
+var mdgriffith$elm_ui$Element$Border$widthXY = F2(
+	function (x, y) {
+		return A2(
+			mdgriffith$elm_ui$Internal$Model$StyleClass,
+			mdgriffith$elm_ui$Internal$Flag$borderWidth,
+			A5(
+				mdgriffith$elm_ui$Internal$Model$BorderWidth,
+				'b-' + (elm$core$String$fromInt(x) + ('-' + elm$core$String$fromInt(y))),
+				y,
+				x,
+				y,
+				x));
+	});
+var mdgriffith$elm_ui$Element$Border$widthEach = function (_n0) {
+	var bottom = _n0.bottom;
+	var top = _n0.top;
+	var left = _n0.left;
+	var right = _n0.right;
+	return (_Utils_eq(top, bottom) && _Utils_eq(left, right)) ? (_Utils_eq(top, right) ? mdgriffith$elm_ui$Element$Border$width(top) : A2(mdgriffith$elm_ui$Element$Border$widthXY, left, top)) : A2(
+		mdgriffith$elm_ui$Internal$Model$StyleClass,
+		mdgriffith$elm_ui$Internal$Flag$borderWidth,
+		A5(
+			mdgriffith$elm_ui$Internal$Model$BorderWidth,
+			'b-' + (elm$core$String$fromInt(top) + ('-' + (elm$core$String$fromInt(right) + ('-' + (elm$core$String$fromInt(bottom) + ('-' + elm$core$String$fromInt(left))))))),
+			top,
+			right,
+			bottom,
+			left));
 };
 var mdgriffith$elm_ui$Internal$Flag$fontAlignment = mdgriffith$elm_ui$Internal$Flag$flag(12);
 var mdgriffith$elm_ui$Internal$Model$Class = F2(
@@ -5637,6 +5697,61 @@ var mdgriffith$elm_ui$Internal$Model$contextClasses = function (context) {
 			return mdgriffith$elm_ui$Internal$Model$pageClass;
 	}
 };
+var elm$core$List$foldrHelper = F4(
+	function (fn, acc, ctr, ls) {
+		if (!ls.b) {
+			return acc;
+		} else {
+			var a = ls.a;
+			var r1 = ls.b;
+			if (!r1.b) {
+				return A2(fn, a, acc);
+			} else {
+				var b = r1.a;
+				var r2 = r1.b;
+				if (!r2.b) {
+					return A2(
+						fn,
+						a,
+						A2(fn, b, acc));
+				} else {
+					var c = r2.a;
+					var r3 = r2.b;
+					if (!r3.b) {
+						return A2(
+							fn,
+							a,
+							A2(
+								fn,
+								b,
+								A2(fn, c, acc)));
+					} else {
+						var d = r3.a;
+						var r4 = r3.b;
+						var res = (ctr > 500) ? A3(
+							elm$core$List$foldl,
+							fn,
+							acc,
+							elm$core$List$reverse(r4)) : A4(elm$core$List$foldrHelper, fn, acc, ctr + 1, r4);
+						return A2(
+							fn,
+							a,
+							A2(
+								fn,
+								b,
+								A2(
+									fn,
+									c,
+									A2(fn, d, res))));
+					}
+				}
+			}
+		}
+	});
+var elm$core$List$foldr = F3(
+	function (fn, acc, ls) {
+		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
+	});
 var elm$core$List$isEmpty = function (xs) {
 	if (!xs.b) {
 		return true;
@@ -8238,6 +8353,18 @@ var mdgriffith$elm_ui$Internal$Model$renderNullAdjustmentRule = F2(
 						]))
 				]));
 	});
+var elm$core$Basics$neq = _Utils_notEqual;
+var elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
 var elm$core$List$maximum = function (list) {
 	if (list.b) {
 		var x = list.a;
@@ -9937,7 +10064,6 @@ var mdgriffith$elm_ui$Internal$Model$renderWidth = function (w) {
 	}
 };
 var elm$core$Basics$ge = _Utils_ge;
-var mdgriffith$elm_ui$Internal$Flag$borderWidth = mdgriffith$elm_ui$Internal$Flag$flag(27);
 var mdgriffith$elm_ui$Internal$Model$skippable = F2(
 	function (flag, style) {
 		if (_Utils_eq(flag, mdgriffith$elm_ui$Internal$Flag$borderWidth)) {
@@ -10934,6 +11060,10 @@ var author$project$Polemos$Combat$fillButton = function (styles) {
 				[
 					mdgriffith$elm_ui$Element$Background$color(
 					A3(mdgriffith$elm_ui$Element$rgb, 0.3, 0.3, 0.7)),
+					mdgriffith$elm_ui$Element$Border$widthEach(
+					{bottom: 1, left: 0, right: 0, top: 0}),
+					mdgriffith$elm_ui$Element$Border$color(
+					A3(mdgriffith$elm_ui$Element$rgb, 1, 1, 1)),
 					mdgriffith$elm_ui$Element$Font$center,
 					mdgriffith$elm_ui$Element$Font$color(
 					A3(mdgriffith$elm_ui$Element$rgb, 1, 1, 1)),
@@ -10950,62 +11080,6 @@ var mdgriffith$elm_ui$Internal$Model$Text = function (a) {
 };
 var mdgriffith$elm_ui$Element$text = function (content) {
 	return mdgriffith$elm_ui$Internal$Model$Text(content);
-};
-var mdgriffith$elm_ui$Internal$Flag$borderColor = mdgriffith$elm_ui$Internal$Flag$flag(28);
-var mdgriffith$elm_ui$Element$Border$color = function (clr) {
-	return A2(
-		mdgriffith$elm_ui$Internal$Model$StyleClass,
-		mdgriffith$elm_ui$Internal$Flag$borderColor,
-		A3(
-			mdgriffith$elm_ui$Internal$Model$Colored,
-			'bc-' + mdgriffith$elm_ui$Internal$Model$formatColorClass(clr),
-			'border-color',
-			clr));
-};
-var mdgriffith$elm_ui$Internal$Model$BorderWidth = F5(
-	function (a, b, c, d, e) {
-		return {$: 'BorderWidth', a: a, b: b, c: c, d: d, e: e};
-	});
-var mdgriffith$elm_ui$Element$Border$width = function (v) {
-	return A2(
-		mdgriffith$elm_ui$Internal$Model$StyleClass,
-		mdgriffith$elm_ui$Internal$Flag$borderWidth,
-		A5(
-			mdgriffith$elm_ui$Internal$Model$BorderWidth,
-			'b-' + elm$core$String$fromInt(v),
-			v,
-			v,
-			v,
-			v));
-};
-var mdgriffith$elm_ui$Element$Border$widthXY = F2(
-	function (x, y) {
-		return A2(
-			mdgriffith$elm_ui$Internal$Model$StyleClass,
-			mdgriffith$elm_ui$Internal$Flag$borderWidth,
-			A5(
-				mdgriffith$elm_ui$Internal$Model$BorderWidth,
-				'b-' + (elm$core$String$fromInt(x) + ('-' + elm$core$String$fromInt(y))),
-				y,
-				x,
-				y,
-				x));
-	});
-var mdgriffith$elm_ui$Element$Border$widthEach = function (_n0) {
-	var bottom = _n0.bottom;
-	var top = _n0.top;
-	var left = _n0.left;
-	var right = _n0.right;
-	return (_Utils_eq(top, bottom) && _Utils_eq(left, right)) ? (_Utils_eq(top, right) ? mdgriffith$elm_ui$Element$Border$width(top) : A2(mdgriffith$elm_ui$Element$Border$widthXY, left, top)) : A2(
-		mdgriffith$elm_ui$Internal$Model$StyleClass,
-		mdgriffith$elm_ui$Internal$Flag$borderWidth,
-		A5(
-			mdgriffith$elm_ui$Internal$Model$BorderWidth,
-			'b-' + (elm$core$String$fromInt(top) + ('-' + (elm$core$String$fromInt(right) + ('-' + (elm$core$String$fromInt(bottom) + ('-' + elm$core$String$fromInt(left))))))),
-			top,
-			right,
-			bottom,
-			left));
 };
 var author$project$Polemos$Combat$resetButton = A2(
 	author$project$Polemos$Combat$fillButton,
@@ -11128,13 +11202,10 @@ var author$project$Polemos$Combat$viewBaseButtons = F4(
 					_List_fromArray(
 						[author$project$Polemos$Combat$resetButton]))));
 	});
-var author$project$Polemos$Combat$Average = {$: 'Average'};
-var author$project$Polemos$Combat$Bad = {$: 'Bad'};
-var author$project$Polemos$Combat$Good = {$: 'Good'};
 var author$project$Polemos$Combat$Raw = {$: 'Raw'};
-var author$project$Polemos$Combat$SetCloseDefensiveModifiers = F2(
+var author$project$Polemos$Combat$SetChargeDefensiveModifiers = F2(
 	function (a, b) {
-		return {$: 'SetCloseDefensiveModifiers', a: a, b: b};
+		return {$: 'SetChargeDefensiveModifiers', a: a, b: b};
 	});
 var author$project$Polemos$Combat$Veteran = {$: 'Veteran'};
 var author$project$Polemos$Combat$inactiveFillButton = author$project$Polemos$Combat$fillButton(
@@ -11190,6 +11261,16 @@ var author$project$Polemos$Combat$modifierButton = F3(
 				onPress: elm$core$Maybe$Just(msg)
 			});
 	});
+var author$project$Polemos$Combat$nextButton = author$project$Polemos$Combat$fillButton(
+	_List_fromArray(
+		[
+			mdgriffith$elm_ui$Element$Background$color(
+			A3(mdgriffith$elm_ui$Element$rgb, 0.7, 0.3, 0.7)),
+			mdgriffith$elm_ui$Element$Border$widthEach(
+			{bottom: 0, left: 0, right: 0, top: 20}),
+			mdgriffith$elm_ui$Element$Border$color(
+			A3(mdgriffith$elm_ui$Element$rgb, 1, 1, 1))
+		]));
 var mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
 	return {$: 'AlignY', a: a};
 };
@@ -11297,6 +11378,572 @@ var author$project$Polemos$Combat$optionButtons = F4(
 						},
 						options))
 				]));
+	});
+var author$project$Polemos$Combat$viewChargeDefensiveModifiers = function (charge) {
+	var optionButtons_ = F4(
+		function (label, options, get, action) {
+			return A4(
+				author$project$Polemos$Combat$optionButtons,
+				label,
+				options,
+				get(charge.defensiveModifiers),
+				function (v) {
+					return A2(
+						author$project$Polemos$Combat$SetChargeDefensiveModifiers,
+						charge,
+						A2(action, charge.defensiveModifiers, v));
+				});
+		});
+	var numberedButton_ = F4(
+		function (label, numbers, get, action) {
+			return A4(
+				author$project$Polemos$Combat$numberedButton,
+				label,
+				numbers,
+				get(charge.defensiveModifiers),
+				function (i) {
+					return A2(
+						author$project$Polemos$Combat$SetChargeDefensiveModifiers,
+						charge,
+						A2(action, charge.defensiveModifiers, i));
+				});
+		});
+	var modifierButton_ = F3(
+		function (label, isActive, action) {
+			return A3(
+				author$project$Polemos$Combat$modifierButton,
+				label,
+				isActive(charge.defensiveModifiers),
+				A2(
+					author$project$Polemos$Combat$SetChargeDefensiveModifiers,
+					charge,
+					action(charge.defensiveModifiers)));
+		});
+	return A2(
+		mdgriffith$elm_ui$Element$column,
+		_List_fromArray(
+			[
+				mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
+				mdgriffith$elm_ui$Element$height(mdgriffith$elm_ui$Element$fill)
+			]),
+		_List_fromArray(
+			[
+				author$project$Polemos$Combat$title('Defensive Modifiers'),
+				A4(
+				numberedButton_,
+				'Shaken',
+				_List_fromArray(
+					[0, 1, 2]),
+				function ($) {
+					return $.shaken;
+				},
+				F2(
+					function (m, i) {
+						return _Utils_update(
+							m,
+							{shaken: i});
+					})),
+				A4(
+				optionButtons_,
+				'Level',
+				_List_fromArray(
+					[
+						_Utils_Tuple2(author$project$Polemos$Combat$Raw, 'Raw'),
+						_Utils_Tuple2(author$project$Polemos$Combat$Trained, 'Exp'),
+						_Utils_Tuple2(author$project$Polemos$Combat$Veteran, 'Vet')
+					]),
+				function ($) {
+					return $.quality;
+				},
+				F2(
+					function (m, v) {
+						return _Utils_update(
+							m,
+							{quality: v});
+					})),
+				A3(
+				modifierButton_,
+				'Elite',
+				function ($) {
+					return $.elite;
+				},
+				function (m) {
+					return _Utils_update(
+						m,
+						{elite: !m.elite});
+				}),
+				A4(
+				numberedButton_,
+				'Terrain',
+				_List_fromArray(
+					[0, 1, 2]),
+				function ($) {
+					return $.terrain;
+				},
+				F2(
+					function (m, i) {
+						return _Utils_update(
+							m,
+							{terrain: i});
+					})),
+				author$project$Polemos$Combat$nextButton(
+				{
+					label: mdgriffith$elm_ui$Element$text('Next →'),
+					onPress: elm$core$Maybe$Just(
+						A2(
+							author$project$Polemos$Combat$SetChargeDefensiveModifiers,
+							charge,
+							function (m) {
+								return _Utils_update(
+									m,
+									{saved: true});
+							}(charge.defensiveModifiers)))
+				}),
+				author$project$Polemos$Combat$resetButton
+			]));
+};
+var author$project$Polemos$Combat$SetChargeDefensiveRoll = F2(
+	function (a, b) {
+		return {$: 'SetChargeDefensiveRoll', a: a, b: b};
+	});
+var author$project$Polemos$Combat$Defensive = {$: 'Defensive'};
+var author$project$Polemos$Combat$Offensive = {$: 'Offensive'};
+var author$project$Polemos$Combat$chargeScore = F2(
+	function (charge, position) {
+		var rollScore = function () {
+			if (position.$ === 'Offensive') {
+				return A2(elm$core$Maybe$withDefault, 0, charge.offensiveRoll);
+			} else {
+				return A2(elm$core$Maybe$withDefault, 0, charge.defensiveRoll);
+			}
+		}();
+		var modifiers = function () {
+			if (position.$ === 'Offensive') {
+				return charge.offensiveModifiers;
+			} else {
+				return charge.defensiveModifiers;
+			}
+		}();
+		var cond = F2(
+			function (c, score) {
+				return c ? score : 0;
+			});
+		var baseScore = function () {
+			if (position.$ === 'Offensive') {
+				return 3;
+			} else {
+				var _n1 = charge.defensive;
+				switch (_n1.$) {
+					case 'Unknown':
+						return 0;
+					case 'Shot':
+						return 2;
+					case 'ShotHeavy':
+						return 3;
+					case 'Mixed':
+						return 4;
+					case 'PikeHeavy':
+						return 5;
+					case 'Pike':
+						return 6;
+					case 'DismountedDragoons':
+						return 1;
+					case 'MountedDragoons':
+						return 1;
+					case 'HorseSwedish':
+						return 3;
+					case 'HorseDutch':
+						return 2;
+					default:
+						return 1;
+				}
+			}
+		}();
+		return ((((((baseScore + rollScore) + (modifiers.shaken * (-1))) + A2(
+			cond,
+			_Utils_eq(modifiers.quality, author$project$Polemos$Combat$Veteran),
+			1)) + A2(cond, modifiers.elite, 1)) + A2(
+			cond,
+			_Utils_eq(position, author$project$Polemos$Combat$Offensive) && modifiers.officerAttached,
+			1)) + A2(
+			cond,
+			_Utils_eq(position, author$project$Polemos$Combat$Offensive) && modifiers.uphill,
+			1)) + A2(
+			cond,
+			_Utils_eq(position, author$project$Polemos$Combat$Defensive),
+			modifiers.terrain);
+	});
+var mdgriffith$elm_ui$Internal$Model$CenterX = {$: 'CenterX'};
+var mdgriffith$elm_ui$Element$centerX = mdgriffith$elm_ui$Internal$Model$AlignX(mdgriffith$elm_ui$Internal$Model$CenterX);
+var mdgriffith$elm_ui$Internal$Flag$spacing = mdgriffith$elm_ui$Internal$Flag$flag(3);
+var mdgriffith$elm_ui$Internal$Model$SpacingStyle = F3(
+	function (a, b, c) {
+		return {$: 'SpacingStyle', a: a, b: b, c: c};
+	});
+var mdgriffith$elm_ui$Internal$Model$spacingName = F2(
+	function (x, y) {
+		return 'spacing-' + (elm$core$String$fromInt(x) + ('-' + elm$core$String$fromInt(y)));
+	});
+var mdgriffith$elm_ui$Element$spacing = function (x) {
+	return A2(
+		mdgriffith$elm_ui$Internal$Model$StyleClass,
+		mdgriffith$elm_ui$Internal$Flag$spacing,
+		A3(
+			mdgriffith$elm_ui$Internal$Model$SpacingStyle,
+			A2(mdgriffith$elm_ui$Internal$Model$spacingName, x, x),
+			x,
+			x));
+};
+var author$project$Polemos$Combat$viewRoll = F4(
+	function (label, model, setRollMsg, scorer) {
+		return A2(
+			mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
+					mdgriffith$elm_ui$Element$height(mdgriffith$elm_ui$Element$fill)
+				]),
+			_List_fromArray(
+				[
+					author$project$Polemos$Combat$title(label),
+					author$project$Polemos$Combat$titleWith(
+					A2(
+						mdgriffith$elm_ui$Element$column,
+						_List_fromArray(
+							[
+								mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
+								mdgriffith$elm_ui$Element$spacing(20)
+							]),
+						_List_fromArray(
+							[
+								A2(
+								mdgriffith$elm_ui$Element$el,
+								_List_fromArray(
+									[mdgriffith$elm_ui$Element$centerX]),
+								mdgriffith$elm_ui$Element$text(
+									author$project$Polemos$Combat$baseToString(model.offensive) + (' (' + (elm$core$String$fromInt(
+										A2(scorer, model, author$project$Polemos$Combat$Offensive)) + ')')))),
+								A2(
+								mdgriffith$elm_ui$Element$el,
+								_List_fromArray(
+									[mdgriffith$elm_ui$Element$centerX]),
+								mdgriffith$elm_ui$Element$text('vs.')),
+								A2(
+								mdgriffith$elm_ui$Element$el,
+								_List_fromArray(
+									[mdgriffith$elm_ui$Element$centerX]),
+								mdgriffith$elm_ui$Element$text(
+									author$project$Polemos$Combat$baseToString(model.defensive) + (' (' + (elm$core$String$fromInt(
+										A2(scorer, model, author$project$Polemos$Combat$Defensive)) + ')'))))
+							]))),
+					A2(
+					mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
+							mdgriffith$elm_ui$Element$height(mdgriffith$elm_ui$Element$fill)
+						]),
+					A2(
+						elm$core$List$map,
+						function (i) {
+							return A2(
+								author$project$Polemos$Combat$fillButton,
+								_List_Nil,
+								{
+									label: mdgriffith$elm_ui$Element$text(
+										elm$core$String$fromInt(i)),
+									onPress: elm$core$Maybe$Just(
+										A2(setRollMsg, model, i))
+								});
+						},
+						_List_fromArray(
+							[1, 2, 3, 4, 5, 6]))),
+					author$project$Polemos$Combat$resetButton
+				]));
+	});
+var author$project$Polemos$Combat$viewChargeDefensiveRoll = function (charge) {
+	return A4(author$project$Polemos$Combat$viewRoll, 'Defensive Roll', charge, author$project$Polemos$Combat$SetChargeDefensiveRoll, author$project$Polemos$Combat$chargeScore);
+};
+var author$project$Polemos$Combat$SetChargeOffensiveModifiers = F2(
+	function (a, b) {
+		return {$: 'SetChargeOffensiveModifiers', a: a, b: b};
+	});
+var author$project$Polemos$Combat$viewChargeOffensiveModifiers = function (charge) {
+	var optionButtons_ = F4(
+		function (label, options, get, action) {
+			return A4(
+				author$project$Polemos$Combat$optionButtons,
+				label,
+				options,
+				get(charge.offensiveModifiers),
+				function (v) {
+					return A2(
+						author$project$Polemos$Combat$SetChargeOffensiveModifiers,
+						charge,
+						A2(action, charge.offensiveModifiers, v));
+				});
+		});
+	var numberedButton_ = F4(
+		function (label, numbers, get, action) {
+			return A4(
+				author$project$Polemos$Combat$numberedButton,
+				label,
+				numbers,
+				get(charge.offensiveModifiers),
+				function (i) {
+					return A2(
+						author$project$Polemos$Combat$SetChargeOffensiveModifiers,
+						charge,
+						A2(action, charge.offensiveModifiers, i));
+				});
+		});
+	var modifierButton_ = F3(
+		function (label, isActive, action) {
+			return A3(
+				author$project$Polemos$Combat$modifierButton,
+				label,
+				isActive(charge.offensiveModifiers),
+				A2(
+					author$project$Polemos$Combat$SetChargeOffensiveModifiers,
+					charge,
+					action(charge.offensiveModifiers)));
+		});
+	return A2(
+		mdgriffith$elm_ui$Element$column,
+		_List_fromArray(
+			[
+				mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
+				mdgriffith$elm_ui$Element$height(mdgriffith$elm_ui$Element$fill)
+			]),
+		_List_fromArray(
+			[
+				author$project$Polemos$Combat$title('Offensive Modifiers'),
+				A4(
+				numberedButton_,
+				'Extra Bases',
+				_List_fromArray(
+					[0, 1, 2]),
+				function ($) {
+					return $.bases;
+				},
+				F2(
+					function (m, i) {
+						return _Utils_update(
+							m,
+							{bases: i});
+					})),
+				A4(
+				optionButtons_,
+				'Level',
+				_List_fromArray(
+					[
+						_Utils_Tuple2(author$project$Polemos$Combat$Raw, 'Raw'),
+						_Utils_Tuple2(author$project$Polemos$Combat$Trained, 'Exp'),
+						_Utils_Tuple2(author$project$Polemos$Combat$Veteran, 'Vet')
+					]),
+				function ($) {
+					return $.quality;
+				},
+				F2(
+					function (m, v) {
+						return _Utils_update(
+							m,
+							{quality: v});
+					})),
+				A3(
+				modifierButton_,
+				'Elite',
+				function ($) {
+					return $.elite;
+				},
+				function (m) {
+					return _Utils_update(
+						m,
+						{elite: !m.elite});
+				}),
+				A3(
+				modifierButton_,
+				'Officer Attached',
+				function ($) {
+					return $.officerAttached;
+				},
+				function (m) {
+					return _Utils_update(
+						m,
+						{officerAttached: !m.officerAttached});
+				}),
+				A3(
+				modifierButton_,
+				'Uphill',
+				function ($) {
+					return $.uphill;
+				},
+				function (m) {
+					return _Utils_update(
+						m,
+						{uphill: !m.uphill});
+				}),
+				author$project$Polemos$Combat$nextButton(
+				{
+					label: mdgriffith$elm_ui$Element$text('Next →'),
+					onPress: elm$core$Maybe$Just(
+						A2(
+							author$project$Polemos$Combat$SetChargeOffensiveModifiers,
+							charge,
+							function (m) {
+								return _Utils_update(
+									m,
+									{saved: true});
+							}(charge.offensiveModifiers)))
+				}),
+				author$project$Polemos$Combat$resetButton
+			]));
+};
+var author$project$Polemos$Combat$SetChargeOffensiveRoll = F2(
+	function (a, b) {
+		return {$: 'SetChargeOffensiveRoll', a: a, b: b};
+	});
+var author$project$Polemos$Combat$viewChargeOffensiveRoll = function (charge) {
+	return A4(author$project$Polemos$Combat$viewRoll, 'Offensive Roll', charge, author$project$Polemos$Combat$SetChargeOffensiveRoll, author$project$Polemos$Combat$chargeScore);
+};
+var author$project$Polemos$Combat$ResetChargeRolls = function (a) {
+	return {$: 'ResetChargeRolls', a: a};
+};
+var author$project$Polemos$Combat$chargeScoreEffect = F2(
+	function (charge, score) {
+		return (score < 0) ? 'Chargers remain in place, shaken +1' : ((score <= 1) ? 'Charge home, shaken +1' : ((score <= 4) ? 'Charge home' : ((score === 5) ? 'Charge home, target shaken +1' : 'Charge home, target recoils shaken +1')));
+	});
+var author$project$Polemos$Combat$fillWith = F2(
+	function (styles, e) {
+		return A2(
+			mdgriffith$elm_ui$Element$el,
+			_Utils_ap(
+				_List_fromArray(
+					[
+						mdgriffith$elm_ui$Element$Font$center,
+						mdgriffith$elm_ui$Element$Font$size(60),
+						A2(mdgriffith$elm_ui$Element$paddingXY, 60, 10),
+						mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
+						mdgriffith$elm_ui$Element$height(mdgriffith$elm_ui$Element$fill)
+					]),
+				styles),
+			e);
+	});
+var mdgriffith$elm_ui$Internal$Model$Paragraph = {$: 'Paragraph'};
+var mdgriffith$elm_ui$Element$paragraph = F2(
+	function (attrs, children) {
+		return A4(
+			mdgriffith$elm_ui$Internal$Model$element,
+			mdgriffith$elm_ui$Internal$Model$asParagraph,
+			mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				elm$core$List$cons,
+				mdgriffith$elm_ui$Internal$Model$Describe(mdgriffith$elm_ui$Internal$Model$Paragraph),
+				A2(
+					elm$core$List$cons,
+					mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
+					A2(
+						elm$core$List$cons,
+						mdgriffith$elm_ui$Element$spacing(5),
+						attrs))),
+			mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
+var author$project$Polemos$Combat$viewChargeScores = function (charge) {
+	var offensiveScore = A2(author$project$Polemos$Combat$chargeScore, charge, author$project$Polemos$Combat$Offensive);
+	var offensiveScoreWithoutRoll = offensiveScore - A2(elm$core$Maybe$withDefault, 0, charge.offensiveRoll);
+	var defensiveScore = A2(author$project$Polemos$Combat$chargeScore, charge, author$project$Polemos$Combat$Defensive);
+	var defensiveScoreWithoutRoll = defensiveScore - A2(elm$core$Maybe$withDefault, 0, charge.defensiveRoll);
+	var score = offensiveScore - defensiveScore;
+	return A2(
+		mdgriffith$elm_ui$Element$column,
+		_List_fromArray(
+			[
+				mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
+				mdgriffith$elm_ui$Element$height(mdgriffith$elm_ui$Element$fill)
+			]),
+		_List_fromArray(
+			[
+				(_Utils_cmp(offensiveScore, defensiveScore) > 0) ? author$project$Polemos$Combat$title('Offensive Wins') : ((_Utils_cmp(offensiveScore, defensiveScore) < 0) ? author$project$Polemos$Combat$title('Defensive Wins') : author$project$Polemos$Combat$title('Draw')),
+				A2(
+				author$project$Polemos$Combat$fillWith,
+				_List_fromArray(
+					[
+						mdgriffith$elm_ui$Element$Background$color(
+						A3(mdgriffith$elm_ui$Element$rgb, 0.3, 0.6, 0.3)),
+						mdgriffith$elm_ui$Element$Font$color(
+						A3(mdgriffith$elm_ui$Element$rgb, 1, 1, 1))
+					]),
+				A2(
+					mdgriffith$elm_ui$Element$paragraph,
+					_List_fromArray(
+						[mdgriffith$elm_ui$Element$centerX, mdgriffith$elm_ui$Element$centerY]),
+					_List_fromArray(
+						[
+							mdgriffith$elm_ui$Element$text(
+							A2(author$project$Polemos$Combat$chargeScoreEffect, charge, score))
+						]))),
+				author$project$Polemos$Combat$titleWith(
+				A2(
+					mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
+							mdgriffith$elm_ui$Element$spacing(20)
+						]),
+					_List_fromArray(
+						[
+							A2(
+							mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[mdgriffith$elm_ui$Element$centerX]),
+							mdgriffith$elm_ui$Element$text(
+								author$project$Polemos$Combat$baseToString(charge.offensive) + (' (' + (elm$core$String$fromInt(offensiveScore) + ')')))),
+							A2(
+							mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[mdgriffith$elm_ui$Element$centerX]),
+							mdgriffith$elm_ui$Element$text('vs.')),
+							A2(
+							mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[mdgriffith$elm_ui$Element$centerX]),
+							mdgriffith$elm_ui$Element$text(
+								author$project$Polemos$Combat$baseToString(charge.defensive) + (' (' + (elm$core$String$fromInt(defensiveScore) + ')'))))
+						]))),
+				A2(
+				author$project$Polemos$Combat$fillButton,
+				_List_Nil,
+				{
+					label: mdgriffith$elm_ui$Element$text('Re-roll'),
+					onPress: elm$core$Maybe$Just(
+						author$project$Polemos$Combat$ResetChargeRolls(charge))
+				}),
+				author$project$Polemos$Combat$resetButton
+			]));
+};
+var author$project$Polemos$Combat$viewCharge = function (charge) {
+	return _Utils_eq(charge.defensive, author$project$Polemos$Combat$Unknown) ? A4(author$project$Polemos$Combat$viewBaseButtons, charge, author$project$Polemos$Combat$SetChargeDefensive, 'Defensive Base', author$project$Polemos$Combat$allBases) : ((!charge.offensiveModifiers.saved) ? author$project$Polemos$Combat$viewChargeOffensiveModifiers(charge) : ((!charge.defensiveModifiers.saved) ? author$project$Polemos$Combat$viewChargeDefensiveModifiers(charge) : (_Utils_eq(charge.offensiveRoll, elm$core$Maybe$Nothing) ? author$project$Polemos$Combat$viewChargeOffensiveRoll(charge) : (_Utils_eq(charge.defensiveRoll, elm$core$Maybe$Nothing) ? author$project$Polemos$Combat$viewChargeDefensiveRoll(charge) : author$project$Polemos$Combat$viewChargeScores(charge)))));
+};
+var author$project$Polemos$Combat$SetCloseDefensive = F2(
+	function (a, b) {
+		return {$: 'SetCloseDefensive', a: a, b: b};
+	});
+var author$project$Polemos$Combat$SetCloseOffensive = F2(
+	function (a, b) {
+		return {$: 'SetCloseOffensive', a: a, b: b};
+	});
+var author$project$Polemos$Combat$closeBases = A2(
+	elm$core$List$filter,
+	function (t) {
+		return !_Utils_eq(t, author$project$Polemos$Combat$Artillery);
+	},
+	author$project$Polemos$Combat$allBases);
+var author$project$Polemos$Combat$Average = {$: 'Average'};
+var author$project$Polemos$Combat$Bad = {$: 'Bad'};
+var author$project$Polemos$Combat$Good = {$: 'Good'};
+var author$project$Polemos$Combat$SetCloseDefensiveModifiers = F2(
+	function (a, b) {
+		return {$: 'SetCloseDefensiveModifiers', a: a, b: b};
 	});
 var author$project$Polemos$Combat$viewCloseDefensiveModifiers = function (close) {
 	var optionButtons_ = F4(
@@ -11610,96 +12257,6 @@ var author$project$Polemos$Combat$closeScore = F2(
 			_Utils_eq(modifiers.quality, author$project$Polemos$Combat$Raw),
 			-1));
 	});
-var author$project$Polemos$Combat$Defensive = {$: 'Defensive'};
-var author$project$Polemos$Combat$Offensive = {$: 'Offensive'};
-var mdgriffith$elm_ui$Internal$Model$CenterX = {$: 'CenterX'};
-var mdgriffith$elm_ui$Element$centerX = mdgriffith$elm_ui$Internal$Model$AlignX(mdgriffith$elm_ui$Internal$Model$CenterX);
-var mdgriffith$elm_ui$Internal$Flag$spacing = mdgriffith$elm_ui$Internal$Flag$flag(3);
-var mdgriffith$elm_ui$Internal$Model$SpacingStyle = F3(
-	function (a, b, c) {
-		return {$: 'SpacingStyle', a: a, b: b, c: c};
-	});
-var mdgriffith$elm_ui$Internal$Model$spacingName = F2(
-	function (x, y) {
-		return 'spacing-' + (elm$core$String$fromInt(x) + ('-' + elm$core$String$fromInt(y)));
-	});
-var mdgriffith$elm_ui$Element$spacing = function (x) {
-	return A2(
-		mdgriffith$elm_ui$Internal$Model$StyleClass,
-		mdgriffith$elm_ui$Internal$Flag$spacing,
-		A3(
-			mdgriffith$elm_ui$Internal$Model$SpacingStyle,
-			A2(mdgriffith$elm_ui$Internal$Model$spacingName, x, x),
-			x,
-			x));
-};
-var author$project$Polemos$Combat$viewRoll = F4(
-	function (label, model, setRollMsg, scorer) {
-		return A2(
-			mdgriffith$elm_ui$Element$column,
-			_List_fromArray(
-				[
-					mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
-					mdgriffith$elm_ui$Element$height(mdgriffith$elm_ui$Element$fill)
-				]),
-			_List_fromArray(
-				[
-					author$project$Polemos$Combat$title(label),
-					author$project$Polemos$Combat$titleWith(
-					A2(
-						mdgriffith$elm_ui$Element$column,
-						_List_fromArray(
-							[
-								mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
-								mdgriffith$elm_ui$Element$spacing(20)
-							]),
-						_List_fromArray(
-							[
-								A2(
-								mdgriffith$elm_ui$Element$el,
-								_List_fromArray(
-									[mdgriffith$elm_ui$Element$centerX]),
-								mdgriffith$elm_ui$Element$text(
-									author$project$Polemos$Combat$baseToString(model.offensive) + (' (' + (elm$core$String$fromInt(
-										A2(scorer, model, author$project$Polemos$Combat$Offensive)) + ')')))),
-								A2(
-								mdgriffith$elm_ui$Element$el,
-								_List_fromArray(
-									[mdgriffith$elm_ui$Element$centerX]),
-								mdgriffith$elm_ui$Element$text('vs.')),
-								A2(
-								mdgriffith$elm_ui$Element$el,
-								_List_fromArray(
-									[mdgriffith$elm_ui$Element$centerX]),
-								mdgriffith$elm_ui$Element$text(
-									author$project$Polemos$Combat$baseToString(model.defensive) + (' (' + (elm$core$String$fromInt(
-										A2(scorer, model, author$project$Polemos$Combat$Defensive)) + ')'))))
-							]))),
-					A2(
-					mdgriffith$elm_ui$Element$column,
-					_List_fromArray(
-						[
-							mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
-							mdgriffith$elm_ui$Element$height(mdgriffith$elm_ui$Element$fill)
-						]),
-					A2(
-						elm$core$List$map,
-						function (i) {
-							return A2(
-								author$project$Polemos$Combat$fillButton,
-								_List_Nil,
-								{
-									label: mdgriffith$elm_ui$Element$text(
-										elm$core$String$fromInt(i)),
-									onPress: elm$core$Maybe$Just(
-										A2(setRollMsg, model, i))
-								});
-						},
-						_List_fromArray(
-							[1, 2, 3, 4, 5, 6]))),
-					author$project$Polemos$Combat$resetButton
-				]));
-	});
 var author$project$Polemos$Combat$viewCloseDefensiveRoll = function (close) {
 	return A4(author$project$Polemos$Combat$viewRoll, 'Defensive Roll', close, author$project$Polemos$Combat$SetCloseDefensiveRoll, author$project$Polemos$Combat$closeScore);
 };
@@ -11939,22 +12496,6 @@ var author$project$Polemos$Combat$closeScoreEffect = F2(
 	function (close, score) {
 		return (!score) ? 'Both recoil' : (close.defensiveModifiers.recoiled ? 'Recoil twice → Rout' : ((score === 1) ? 'Recoil' : ((score <= 3) ? 'Recoil shaken +1' : ((close.defensiveModifiers.shaken >= 2) ? 'Shaken over 2 → Rout' : ((score <= 5) ? 'Recoil shaken +2' : 'Rout')))));
 	});
-var author$project$Polemos$Combat$fillWith = F2(
-	function (styles, e) {
-		return A2(
-			mdgriffith$elm_ui$Element$el,
-			_Utils_ap(
-				_List_fromArray(
-					[
-						mdgriffith$elm_ui$Element$Font$center,
-						mdgriffith$elm_ui$Element$Font$size(60),
-						A2(mdgriffith$elm_ui$Element$paddingXY, 60, 10),
-						mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
-						mdgriffith$elm_ui$Element$height(mdgriffith$elm_ui$Element$fill)
-					]),
-				styles),
-			e);
-	});
 var author$project$Polemos$Combat$viewCloseScores = function (close) {
 	var offensiveScore = A2(author$project$Polemos$Combat$closeScore, close, author$project$Polemos$Combat$Offensive);
 	var offensiveScoreWithoutRoll = offensiveScore - A2(elm$core$Maybe$withDefault, 0, close.offensiveRoll);
@@ -11981,11 +12522,14 @@ var author$project$Polemos$Combat$viewCloseScores = function (close) {
 						A3(mdgriffith$elm_ui$Element$rgb, 1, 1, 1))
 					]),
 				A2(
-					mdgriffith$elm_ui$Element$el,
+					mdgriffith$elm_ui$Element$paragraph,
 					_List_fromArray(
 						[mdgriffith$elm_ui$Element$centerX, mdgriffith$elm_ui$Element$centerY]),
-					mdgriffith$elm_ui$Element$text(
-						A2(author$project$Polemos$Combat$closeScoreEffect, close, score)))),
+					_List_fromArray(
+						[
+							mdgriffith$elm_ui$Element$text(
+							A2(author$project$Polemos$Combat$closeScoreEffect, close, score))
+						]))),
 				author$project$Polemos$Combat$titleWith(
 				A2(
 					mdgriffith$elm_ui$Element$column,
@@ -12028,6 +12572,7 @@ var author$project$Polemos$Combat$viewCloseScores = function (close) {
 var author$project$Polemos$Combat$viewClose = function (close) {
 	return _Utils_eq(close.offensive, author$project$Polemos$Combat$Unknown) ? A4(author$project$Polemos$Combat$viewBaseButtons, close, author$project$Polemos$Combat$SetCloseOffensive, 'Offensive Base', author$project$Polemos$Combat$closeBases) : (_Utils_eq(close.defensive, author$project$Polemos$Combat$Unknown) ? A4(author$project$Polemos$Combat$viewBaseButtons, close, author$project$Polemos$Combat$SetCloseDefensive, 'Defensive Base', author$project$Polemos$Combat$allBases) : ((!close.offensiveModifiers.saved) ? author$project$Polemos$Combat$viewCloseOffensiveModifiers(close) : ((!close.defensiveModifiers.saved) ? author$project$Polemos$Combat$viewCloseDefensiveModifiers(close) : (_Utils_eq(close.offensiveRoll, elm$core$Maybe$Nothing) ? author$project$Polemos$Combat$viewCloseOffensiveRoll(close) : (_Utils_eq(close.defensiveRoll, elm$core$Maybe$Nothing) ? author$project$Polemos$Combat$viewCloseDefensiveRoll(close) : author$project$Polemos$Combat$viewCloseScores(close))))));
 };
+var author$project$Polemos$Combat$StartCharge = {$: 'StartCharge'};
 var author$project$Polemos$Combat$StartClose = {$: 'StartClose'};
 var author$project$Polemos$Combat$StartRanged = {$: 'StartRanged'};
 var author$project$Polemos$Combat$viewNew = A2(
@@ -12041,7 +12586,11 @@ var author$project$Polemos$Combat$viewNew = A2(
 		[
 			A2(
 			author$project$Polemos$Combat$fillButton,
-			_List_Nil,
+			_List_fromArray(
+				[
+					mdgriffith$elm_ui$Element$Border$widthEach(
+					{bottom: 20, left: 0, right: 0, top: 0})
+				]),
 			{
 				label: mdgriffith$elm_ui$Element$text('Ranged Combat'),
 				onPress: elm$core$Maybe$Just(author$project$Polemos$Combat$StartRanged)
@@ -12051,11 +12600,24 @@ var author$project$Polemos$Combat$viewNew = A2(
 			_List_fromArray(
 				[
 					mdgriffith$elm_ui$Element$Background$color(
-					A3(mdgriffith$elm_ui$Element$rgb, 0.7, 0.3, 0.3))
+					A3(mdgriffith$elm_ui$Element$rgb, 0.7, 0.3, 0.3)),
+					mdgriffith$elm_ui$Element$Border$widthEach(
+					{bottom: 20, left: 0, right: 0, top: 0})
 				]),
 			{
 				label: mdgriffith$elm_ui$Element$text('Close Combat'),
 				onPress: elm$core$Maybe$Just(author$project$Polemos$Combat$StartClose)
+			}),
+			A2(
+			author$project$Polemos$Combat$fillButton,
+			_List_fromArray(
+				[
+					mdgriffith$elm_ui$Element$Background$color(
+					A3(mdgriffith$elm_ui$Element$rgb, 0.3, 0.7, 0.3))
+				]),
+			{
+				label: mdgriffith$elm_ui$Element$text('Charge'),
+				onPress: elm$core$Maybe$Just(author$project$Polemos$Combat$StartCharge)
 			})
 		]));
 var author$project$Polemos$Combat$SetRangedDefensive = F2(
@@ -12076,16 +12638,6 @@ var author$project$Polemos$Combat$SetRangedDefensiveModifiers = F2(
 	function (a, b) {
 		return {$: 'SetRangedDefensiveModifiers', a: a, b: b};
 	});
-var author$project$Polemos$Combat$nextButton = author$project$Polemos$Combat$fillButton(
-	_List_fromArray(
-		[
-			mdgriffith$elm_ui$Element$Background$color(
-			A3(mdgriffith$elm_ui$Element$rgb, 0.7, 0.3, 0.7)),
-			mdgriffith$elm_ui$Element$Border$widthEach(
-			{bottom: 0, left: 0, right: 0, top: 20}),
-			mdgriffith$elm_ui$Element$Border$color(
-			A3(mdgriffith$elm_ui$Element$rgb, 1, 1, 1))
-		]));
 var author$project$Polemos$Combat$viewRangedDefensiveModifiers = function (ranged) {
 	var optionButtons_ = F4(
 		function (label, options, get, action) {
@@ -12487,11 +13039,14 @@ var author$project$Polemos$Combat$viewRangedScores = function (ranged) {
 						A3(mdgriffith$elm_ui$Element$rgb, 1, 1, 1))
 					]),
 				A2(
-					mdgriffith$elm_ui$Element$el,
+					mdgriffith$elm_ui$Element$paragraph,
 					_List_fromArray(
 						[mdgriffith$elm_ui$Element$centerX, mdgriffith$elm_ui$Element$centerY]),
-					mdgriffith$elm_ui$Element$text(
-						A2(author$project$Polemos$Combat$rangedScoreEffect, ranged, score)))),
+					_List_fromArray(
+						[
+							mdgriffith$elm_ui$Element$text(
+							A2(author$project$Polemos$Combat$rangedScoreEffect, ranged, score))
+						]))),
 				author$project$Polemos$Combat$titleWith(
 				A2(
 					mdgriffith$elm_ui$Element$column,
@@ -12800,9 +13355,12 @@ var author$project$Polemos$Combat$view = function (model) {
 				case 'Ranged':
 					var ranged = model.a;
 					return author$project$Polemos$Combat$viewRanged(ranged);
-				default:
+				case 'Close':
 					var close = model.a;
 					return author$project$Polemos$Combat$viewClose(close);
+				default:
+					var charge = model.a;
+					return author$project$Polemos$Combat$viewCharge(charge);
 			}
 		}());
 };
