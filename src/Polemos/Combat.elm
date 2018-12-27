@@ -82,6 +82,28 @@ type BaseType
     | Artillery
 
 
+allBases =
+    [ Shot
+    , ShotHeavy
+    , Mixed
+    , PikeHeavy
+    , Pike
+    , DismountedDragoons
+    , MountedDragoons
+    , HorseSwedish
+    , HorseDutch
+    , Artillery
+    ]
+
+
+closeBases =
+    List.filter (\t -> t /= Artillery) allBases
+
+
+rangedBases =
+    List.filter (\t -> t /= HorseSwedish && t /= HorseDutch) allBases
+
+
 type alias RangedModifiers =
     { longRange : Bool
     , artilleryDistance : Int
@@ -418,39 +440,75 @@ closeScore close position =
                             0
 
                 Defensive ->
-                    case close.defensive of
-                        Unknown ->
-                            0
+                    if close.offensive == MountedDragoons || close.offensive == HorseSwedish || close.offensive == HorseDutch then
+                        case close.defensive of
+                            Unknown ->
+                                0
 
-                        Shot ->
-                            1
+                            Shot ->
+                                2
 
-                        ShotHeavy ->
-                            2
+                            ShotHeavy ->
+                                3
 
-                        Mixed ->
-                            3
+                            Mixed ->
+                                4
 
-                        PikeHeavy ->
-                            4
+                            PikeHeavy ->
+                                5
 
-                        Pike ->
-                            5
+                            Pike ->
+                                6
 
-                        DismountedDragoons ->
-                            1
+                            DismountedDragoons ->
+                                1
 
-                        MountedDragoons ->
-                            1
+                            MountedDragoons ->
+                                1
 
-                        HorseSwedish ->
-                            3
+                            HorseSwedish ->
+                                3
 
-                        HorseDutch ->
-                            3
+                            HorseDutch ->
+                                3
 
-                        Artillery ->
-                            1
+                            Artillery ->
+                                1
+
+                    else
+                        case close.defensive of
+                            Unknown ->
+                                0
+
+                            Shot ->
+                                1
+
+                            ShotHeavy ->
+                                2
+
+                            Mixed ->
+                                3
+
+                            PikeHeavy ->
+                                4
+
+                            Pike ->
+                                5
+
+                            DismountedDragoons ->
+                                1
+
+                            MountedDragoons ->
+                                1
+
+                            HorseSwedish ->
+                                3
+
+                            HorseDutch ->
+                                3
+
+                            Artillery ->
+                                1
 
         contactingScore =
             case modifiers.contacting of
@@ -667,10 +725,10 @@ viewNew =
 
 viewRanged ranged =
     if ranged.offensive == Unknown then
-        viewBaseButtons ranged SetRangedOffensive "Offensive Base" "Combat = Ranged"
+        viewBaseButtons ranged SetRangedOffensive "Offensive Base" rangedBases
 
     else if ranged.defensive == Unknown then
-        viewBaseButtons ranged SetRangedDefensive "Defensive Base" "Combat = Ranged"
+        viewBaseButtons ranged SetRangedDefensive "Defensive Base" allBases
 
     else if not ranged.offensiveModifiers.saved then
         viewRangedOffensiveModifiers ranged
@@ -713,10 +771,10 @@ viewRanged ranged =
 
 viewClose close =
     if close.offensive == Unknown then
-        viewBaseButtons close SetCloseOffensive "Offensive Base" "Combat = Close"
+        viewBaseButtons close SetCloseOffensive "Offensive Base" closeBases
 
     else if close.defensive == Unknown then
-        viewBaseButtons close SetCloseDefensive "Defensive Base" "Combat = Close"
+        viewBaseButtons close SetCloseDefensive "Defensive Base" allBases
 
     else if not close.offensiveModifiers.saved then
         viewCloseOffensiveModifiers close
@@ -745,7 +803,7 @@ viewCloseBattle close =
         ]
 
 
-viewBaseButtons combat setMsg label subLabel =
+viewBaseButtons combat setMsg label bases =
     let
         baseButton base =
             fillButton []
@@ -753,27 +811,10 @@ viewBaseButtons combat setMsg label subLabel =
                 , label = text (baseToString base)
                 }
     in
-    --title label
-    -- , option subLabel
-    -- , if combat.offensive == Unknown then
-    --     none
-    --   else
-    --     option ("Offensive = " ++ baseToString combat.offensive)
-    -- , separator
-    column [ width fill, height fill ]
-        [ title label
-        , baseButton Shot
-        , baseButton ShotHeavy
-        , baseButton Mixed
-        , baseButton PikeHeavy
-        , baseButton Pike
-        , baseButton DismountedDragoons
-        , baseButton MountedDragoons
-        , baseButton HorseSwedish
-        , baseButton HorseDutch
-        , baseButton Artillery
-        , resetButton
-        ]
+    column [ width fill, height fill ] <|
+        [ title label ]
+            ++ List.map baseButton bases
+            ++ [ resetButton ]
 
 
 viewRangedOffensiveModifiers ranged =

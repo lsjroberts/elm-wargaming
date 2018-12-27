@@ -5236,6 +5236,81 @@ var author$project$Polemos$Combat$Pike = {$: 'Pike'};
 var author$project$Polemos$Combat$PikeHeavy = {$: 'PikeHeavy'};
 var author$project$Polemos$Combat$Shot = {$: 'Shot'};
 var author$project$Polemos$Combat$ShotHeavy = {$: 'ShotHeavy'};
+var author$project$Polemos$Combat$allBases = _List_fromArray(
+	[author$project$Polemos$Combat$Shot, author$project$Polemos$Combat$ShotHeavy, author$project$Polemos$Combat$Mixed, author$project$Polemos$Combat$PikeHeavy, author$project$Polemos$Combat$Pike, author$project$Polemos$Combat$DismountedDragoons, author$project$Polemos$Combat$MountedDragoons, author$project$Polemos$Combat$HorseSwedish, author$project$Polemos$Combat$HorseDutch, author$project$Polemos$Combat$Artillery]);
+var elm$core$Basics$neq = _Utils_notEqual;
+var elm$core$List$foldrHelper = F4(
+	function (fn, acc, ctr, ls) {
+		if (!ls.b) {
+			return acc;
+		} else {
+			var a = ls.a;
+			var r1 = ls.b;
+			if (!r1.b) {
+				return A2(fn, a, acc);
+			} else {
+				var b = r1.a;
+				var r2 = r1.b;
+				if (!r2.b) {
+					return A2(
+						fn,
+						a,
+						A2(fn, b, acc));
+				} else {
+					var c = r2.a;
+					var r3 = r2.b;
+					if (!r3.b) {
+						return A2(
+							fn,
+							a,
+							A2(
+								fn,
+								b,
+								A2(fn, c, acc)));
+					} else {
+						var d = r3.a;
+						var r4 = r3.b;
+						var res = (ctr > 500) ? A3(
+							elm$core$List$foldl,
+							fn,
+							acc,
+							elm$core$List$reverse(r4)) : A4(elm$core$List$foldrHelper, fn, acc, ctr + 1, r4);
+						return A2(
+							fn,
+							a,
+							A2(
+								fn,
+								b,
+								A2(
+									fn,
+									c,
+									A2(fn, d, res))));
+					}
+				}
+			}
+		}
+	});
+var elm$core$List$foldr = F3(
+	function (fn, acc, ls) {
+		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
+	});
+var elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var author$project$Polemos$Combat$closeBases = A2(
+	elm$core$List$filter,
+	function (t) {
+		return !_Utils_eq(t, author$project$Polemos$Combat$Artillery);
+	},
+	author$project$Polemos$Combat$allBases);
 var author$project$Polemos$Combat$baseToString = function (base) {
 	switch (base.$) {
 		case 'Unknown':
@@ -5562,61 +5637,6 @@ var mdgriffith$elm_ui$Internal$Model$contextClasses = function (context) {
 			return mdgriffith$elm_ui$Internal$Model$pageClass;
 	}
 };
-var elm$core$List$foldrHelper = F4(
-	function (fn, acc, ctr, ls) {
-		if (!ls.b) {
-			return acc;
-		} else {
-			var a = ls.a;
-			var r1 = ls.b;
-			if (!r1.b) {
-				return A2(fn, a, acc);
-			} else {
-				var b = r1.a;
-				var r2 = r1.b;
-				if (!r2.b) {
-					return A2(
-						fn,
-						a,
-						A2(fn, b, acc));
-				} else {
-					var c = r2.a;
-					var r3 = r2.b;
-					if (!r3.b) {
-						return A2(
-							fn,
-							a,
-							A2(
-								fn,
-								b,
-								A2(fn, c, acc)));
-					} else {
-						var d = r3.a;
-						var r4 = r3.b;
-						var res = (ctr > 500) ? A3(
-							elm$core$List$foldl,
-							fn,
-							acc,
-							elm$core$List$reverse(r4)) : A4(elm$core$List$foldrHelper, fn, acc, ctr + 1, r4);
-						return A2(
-							fn,
-							a,
-							A2(
-								fn,
-								b,
-								A2(
-									fn,
-									c,
-									A2(fn, d, res))));
-					}
-				}
-			}
-		}
-	});
-var elm$core$List$foldr = F3(
-	function (fn, acc, ls) {
-		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
-	});
 var elm$core$List$isEmpty = function (xs) {
 	if (!xs.b) {
 		return true;
@@ -8217,18 +8237,6 @@ var mdgriffith$elm_ui$Internal$Model$renderNullAdjustmentRule = F2(
 							_Utils_Tuple2('line-height', '1')
 						]))
 				]));
-	});
-var elm$core$Basics$neq = _Utils_notEqual;
-var elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
 	});
 var elm$core$List$maximum = function (list) {
 	if (list.b) {
@@ -11091,7 +11099,7 @@ var mdgriffith$elm_ui$Element$column = F2(
 			mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
 var author$project$Polemos$Combat$viewBaseButtons = F4(
-	function (combat, setMsg, label, subLabel) {
+	function (combat, setMsg, label, bases) {
 		var baseButton = function (base) {
 			return A2(
 				author$project$Polemos$Combat$fillButton,
@@ -11110,21 +11118,15 @@ var author$project$Polemos$Combat$viewBaseButtons = F4(
 					mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
 					mdgriffith$elm_ui$Element$height(mdgriffith$elm_ui$Element$fill)
 				]),
-			_List_fromArray(
-				[
-					author$project$Polemos$Combat$title(label),
-					baseButton(author$project$Polemos$Combat$Shot),
-					baseButton(author$project$Polemos$Combat$ShotHeavy),
-					baseButton(author$project$Polemos$Combat$Mixed),
-					baseButton(author$project$Polemos$Combat$PikeHeavy),
-					baseButton(author$project$Polemos$Combat$Pike),
-					baseButton(author$project$Polemos$Combat$DismountedDragoons),
-					baseButton(author$project$Polemos$Combat$MountedDragoons),
-					baseButton(author$project$Polemos$Combat$HorseSwedish),
-					baseButton(author$project$Polemos$Combat$HorseDutch),
-					baseButton(author$project$Polemos$Combat$Artillery),
-					author$project$Polemos$Combat$resetButton
-				]));
+			_Utils_ap(
+				_List_fromArray(
+					[
+						author$project$Polemos$Combat$title(label)
+					]),
+				_Utils_ap(
+					A2(elm$core$List$map, baseButton, bases),
+					_List_fromArray(
+						[author$project$Polemos$Combat$resetButton]))));
 	});
 var author$project$Polemos$Combat$Average = {$: 'Average'};
 var author$project$Polemos$Combat$Bad = {$: 'Bad'};
@@ -11492,8 +11494,8 @@ var author$project$Polemos$Combat$closeScore = F2(
 			}
 		}();
 		var contactingScore = function () {
-			var _n3 = modifiers.contacting;
-			switch (_n3.$) {
+			var _n4 = modifiers.contacting;
+			switch (_n4.$) {
 				case 'Static':
 					return 0;
 				case 'ChargingFlankOrRear':
@@ -11534,30 +11536,58 @@ var author$project$Polemos$Combat$closeScore = F2(
 						return 0;
 				}
 			} else {
-				var _n2 = close.defensive;
-				switch (_n2.$) {
-					case 'Unknown':
-						return 0;
-					case 'Shot':
-						return 1;
-					case 'ShotHeavy':
-						return 2;
-					case 'Mixed':
-						return 3;
-					case 'PikeHeavy':
-						return 4;
-					case 'Pike':
-						return 5;
-					case 'DismountedDragoons':
-						return 1;
-					case 'MountedDragoons':
-						return 1;
-					case 'HorseSwedish':
-						return 3;
-					case 'HorseDutch':
-						return 3;
-					default:
-						return 1;
+				if (_Utils_eq(close.offensive, author$project$Polemos$Combat$MountedDragoons) || (_Utils_eq(close.offensive, author$project$Polemos$Combat$HorseSwedish) || _Utils_eq(close.offensive, author$project$Polemos$Combat$HorseDutch))) {
+					var _n2 = close.defensive;
+					switch (_n2.$) {
+						case 'Unknown':
+							return 0;
+						case 'Shot':
+							return 2;
+						case 'ShotHeavy':
+							return 3;
+						case 'Mixed':
+							return 4;
+						case 'PikeHeavy':
+							return 5;
+						case 'Pike':
+							return 6;
+						case 'DismountedDragoons':
+							return 1;
+						case 'MountedDragoons':
+							return 1;
+						case 'HorseSwedish':
+							return 3;
+						case 'HorseDutch':
+							return 3;
+						default:
+							return 1;
+					}
+				} else {
+					var _n3 = close.defensive;
+					switch (_n3.$) {
+						case 'Unknown':
+							return 0;
+						case 'Shot':
+							return 1;
+						case 'ShotHeavy':
+							return 2;
+						case 'Mixed':
+							return 3;
+						case 'PikeHeavy':
+							return 4;
+						case 'Pike':
+							return 5;
+						case 'DismountedDragoons':
+							return 1;
+						case 'MountedDragoons':
+							return 1;
+						case 'HorseSwedish':
+							return 3;
+						case 'HorseDutch':
+							return 3;
+						default:
+							return 1;
+					}
 				}
 			}
 		}();
@@ -11983,7 +12013,7 @@ var author$project$Polemos$Combat$viewCloseScores = function (close) {
 			]));
 };
 var author$project$Polemos$Combat$viewClose = function (close) {
-	return _Utils_eq(close.offensive, author$project$Polemos$Combat$Unknown) ? A4(author$project$Polemos$Combat$viewBaseButtons, close, author$project$Polemos$Combat$SetCloseOffensive, 'Offensive Base', 'Combat = Close') : (_Utils_eq(close.defensive, author$project$Polemos$Combat$Unknown) ? A4(author$project$Polemos$Combat$viewBaseButtons, close, author$project$Polemos$Combat$SetCloseDefensive, 'Defensive Base', 'Combat = Close') : ((!close.offensiveModifiers.saved) ? author$project$Polemos$Combat$viewCloseOffensiveModifiers(close) : ((!close.defensiveModifiers.saved) ? author$project$Polemos$Combat$viewCloseDefensiveModifiers(close) : (_Utils_eq(close.offensiveRoll, elm$core$Maybe$Nothing) ? author$project$Polemos$Combat$viewCloseOffensiveRoll(close) : (_Utils_eq(close.defensiveRoll, elm$core$Maybe$Nothing) ? author$project$Polemos$Combat$viewCloseDefensiveRoll(close) : author$project$Polemos$Combat$viewCloseScores(close))))));
+	return _Utils_eq(close.offensive, author$project$Polemos$Combat$Unknown) ? A4(author$project$Polemos$Combat$viewBaseButtons, close, author$project$Polemos$Combat$SetCloseOffensive, 'Offensive Base', author$project$Polemos$Combat$closeBases) : (_Utils_eq(close.defensive, author$project$Polemos$Combat$Unknown) ? A4(author$project$Polemos$Combat$viewBaseButtons, close, author$project$Polemos$Combat$SetCloseDefensive, 'Defensive Base', author$project$Polemos$Combat$allBases) : ((!close.offensiveModifiers.saved) ? author$project$Polemos$Combat$viewCloseOffensiveModifiers(close) : ((!close.defensiveModifiers.saved) ? author$project$Polemos$Combat$viewCloseDefensiveModifiers(close) : (_Utils_eq(close.offensiveRoll, elm$core$Maybe$Nothing) ? author$project$Polemos$Combat$viewCloseOffensiveRoll(close) : (_Utils_eq(close.defensiveRoll, elm$core$Maybe$Nothing) ? author$project$Polemos$Combat$viewCloseDefensiveRoll(close) : author$project$Polemos$Combat$viewCloseScores(close))))));
 };
 var author$project$Polemos$Combat$StartClose = {$: 'StartClose'};
 var author$project$Polemos$Combat$StartRanged = {$: 'StartRanged'};
@@ -12023,6 +12053,12 @@ var author$project$Polemos$Combat$SetRangedOffensive = F2(
 	function (a, b) {
 		return {$: 'SetRangedOffensive', a: a, b: b};
 	});
+var author$project$Polemos$Combat$rangedBases = A2(
+	elm$core$List$filter,
+	function (t) {
+		return (!_Utils_eq(t, author$project$Polemos$Combat$HorseSwedish)) && (!_Utils_eq(t, author$project$Polemos$Combat$HorseDutch));
+	},
+	author$project$Polemos$Combat$allBases);
 var author$project$Polemos$Combat$SetRangedDefensiveModifiers = F2(
 	function (a, b) {
 		return {$: 'SetRangedDefensiveModifiers', a: a, b: b};
@@ -12462,7 +12498,7 @@ var author$project$Polemos$Combat$viewRangedScores = function (ranged) {
 			]));
 };
 var author$project$Polemos$Combat$viewRanged = function (ranged) {
-	return _Utils_eq(ranged.offensive, author$project$Polemos$Combat$Unknown) ? A4(author$project$Polemos$Combat$viewBaseButtons, ranged, author$project$Polemos$Combat$SetRangedOffensive, 'Offensive Base', 'Combat = Ranged') : (_Utils_eq(ranged.defensive, author$project$Polemos$Combat$Unknown) ? A4(author$project$Polemos$Combat$viewBaseButtons, ranged, author$project$Polemos$Combat$SetRangedDefensive, 'Defensive Base', 'Combat = Ranged') : ((!ranged.offensiveModifiers.saved) ? author$project$Polemos$Combat$viewRangedOffensiveModifiers(ranged) : ((!ranged.defensiveModifiers.saved) ? author$project$Polemos$Combat$viewRangedDefensiveModifiers(ranged) : (_Utils_eq(ranged.offensiveRoll, elm$core$Maybe$Nothing) ? author$project$Polemos$Combat$viewRangedOffensiveRoll(ranged) : (_Utils_eq(ranged.defensiveRoll, elm$core$Maybe$Nothing) ? author$project$Polemos$Combat$viewRangedDefensiveRoll(ranged) : author$project$Polemos$Combat$viewRangedScores(ranged))))));
+	return _Utils_eq(ranged.offensive, author$project$Polemos$Combat$Unknown) ? A4(author$project$Polemos$Combat$viewBaseButtons, ranged, author$project$Polemos$Combat$SetRangedOffensive, 'Offensive Base', author$project$Polemos$Combat$rangedBases) : (_Utils_eq(ranged.defensive, author$project$Polemos$Combat$Unknown) ? A4(author$project$Polemos$Combat$viewBaseButtons, ranged, author$project$Polemos$Combat$SetRangedDefensive, 'Defensive Base', author$project$Polemos$Combat$allBases) : ((!ranged.offensiveModifiers.saved) ? author$project$Polemos$Combat$viewRangedOffensiveModifiers(ranged) : ((!ranged.defensiveModifiers.saved) ? author$project$Polemos$Combat$viewRangedDefensiveModifiers(ranged) : (_Utils_eq(ranged.offensiveRoll, elm$core$Maybe$Nothing) ? author$project$Polemos$Combat$viewRangedOffensiveRoll(ranged) : (_Utils_eq(ranged.defensiveRoll, elm$core$Maybe$Nothing) ? author$project$Polemos$Combat$viewRangedDefensiveRoll(ranged) : author$project$Polemos$Combat$viewRangedScores(ranged))))));
 };
 var mdgriffith$elm_ui$Internal$Model$OnlyDynamic = F2(
 	function (a, b) {
