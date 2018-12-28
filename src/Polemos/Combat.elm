@@ -210,7 +210,7 @@ init _ =
 initRangedModifiers : RangedModifiers
 initRangedModifiers =
     { longRange = False
-    , artilleryDistance = 0
+    , artilleryDistance = 2
     , shaken = 0
     , quality = Trained
     , elite = False
@@ -343,8 +343,8 @@ rangedScore ranged position =
         + cond modifiers.officerAttached 1
         + cond modifiers.uphill 1
         |> (+)
-            (if modifiers.artilleryDistance > 1 then
-                modifiers.artilleryDistance * -1
+            (if modifiers.artilleryDistance > 2 then
+                (modifiers.artilleryDistance - 2) * -1
 
              else
                 0
@@ -894,7 +894,7 @@ viewRangedOffensiveModifiers ranged =
     column [ width fill, height fill ]
         [ title "Offensive Modifiers"
         , if ranged.offensive == Artillery then
-            numberedButton_ "Artillery Distance" [ 0, 1, 2, 3, 4 ] .artilleryDistance (\m i -> { m | artilleryDistance = i })
+            numberedButton_ "Distance" [ 2, 3, 4 ] .artilleryDistance (\m i -> { m | artilleryDistance = i })
 
           else
             modifierButton_ "Long Range" .longRange (\m -> { m | longRange = not m.longRange })
@@ -1220,6 +1220,9 @@ viewCloseScores close =
                             ++ " ("
                             ++ (defensiveScore |> String.fromInt)
                             ++ ")"
+                , el [ centerX ] <|
+                    text <|
+                        (offensiveScore - defensiveScore |> String.fromInt)
                 ]
             )
         , fillButton []
